@@ -1,5 +1,5 @@
 import unittest
-from connectors import InputConnector
+from df_prep.connectors import InputConnector
 
 class TestInputConnector(unittest.TestCase):
     def test_greet(self):
