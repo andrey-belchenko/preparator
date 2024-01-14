@@ -17,7 +17,7 @@ class ExampleProcessor(Processor[ExampleProcessorParams]):
         self.title = "Входящий коннектор (Пример)"
         self.description = "Пример входящего коннектора"
 
-    def run(self, params):
+    def action(self, params):
         print(params.fileName.title, ":", params.fileName.value)
         print(params.target.title, ":", params.target.value.name)
 

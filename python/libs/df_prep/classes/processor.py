@@ -51,6 +51,10 @@ class Processor(Generic[TParams], ABC):
         self.title = ""
         self.description = ""
 
-    @abstractmethod
     def run(self, params: TParams):
+        self.action(params)
+        return params
+
+    @abstractmethod
+    def action(self, params: TParams):
         return params
