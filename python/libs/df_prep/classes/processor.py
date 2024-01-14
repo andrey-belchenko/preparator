@@ -2,7 +2,6 @@ from typing import TypeVar, Generic
 from abc import ABC, abstractmethod
 
 
-
 TParamType = TypeVar("TParamType")
 
 
@@ -18,6 +17,19 @@ class ProcessorParam(Generic[TParamType]):
         self.description = description
         self.value = value
         self.readOnly = readOnly
+
+    def get(self):
+        return self.value
+
+
+class Secret:
+    def __init__(
+        self,
+        value: str = None,
+        identifier: str = None,  # предполагаю организовать хранение секретов в отдельном сервисе, и тогда можно будет ссылаться на них по идентификатору
+    ):
+        self.value = value
+        self.identifier = identifier
 
 
 # class StringParam(ProcessorParam[str]):
