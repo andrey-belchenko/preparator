@@ -3,7 +3,7 @@ from run.utils import yandex_disk
 import pandas as pd
 
 
-class YandexDiskExcelProcessorParams(ProcessorParams):
+class YandexDiskExcelInputParams(ProcessorParams):
     def __init__(self):
         self.filePath = ProcessorParam[str](
             title="Путь к файлу",
@@ -16,7 +16,7 @@ class YandexDiskExcelProcessorParams(ProcessorParams):
         self.target = ProcessorParam[DbWriter](title="Целевая коллекция")
 
 
-class YandexDiskExcelProcessor(Processor[YandexDiskExcelProcessorParams]):
+class YandexDiskExcelInput(Processor[YandexDiskExcelInputParams]):
     def __init__(self):
         self.title = "Входящий коннектор. Яндекс Диск. Excel файл"
         self.description = "Читает Excel файл из Яндекс Диска и записывает данные 1-го листа в коллекцию (предварительно коллекция зачищается). 1-я строка файла содержит заголовки полей."
@@ -27,7 +27,7 @@ class YandexDiskExcelProcessor(Processor[YandexDiskExcelProcessorParams]):
         )
         excel_file = pd.read_excel(file_data)
         items = excel_file.to_dict("records")
-        params.target.get().insert_many(items)
+        params.target.get().write_many(items)
         print(
-            f"File {params.filePath.get()} data loaded into '{params.target.get().name}' collection"
+            f"file {params.filePath.get()} data loaded into '{params.target.get().name}' collection"
         )

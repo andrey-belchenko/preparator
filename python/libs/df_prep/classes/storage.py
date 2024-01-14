@@ -64,11 +64,20 @@ class DbReader(DbCollection):
     def __init__(self, collectionName: str, database: Database = None):
         super().__init__(collectionName, database)
 
+    def read_all(self):
+        return self.instance().find({})
+
 
 class DbWriter(DbCollection):
     def __init__(self, collectionName: str, database: Database = None):
         super().__init__(collectionName, database)
+        self._cleared = False
+    
+    def _clear_if_need(self):
+        if not self._cleared:
+            self.instance().delete_many({})
+            self._cleared = True
 
-    def insert_many(self, documents: list[dict]):
-        self.instance().delete_many({})
+    def write_many(self, documents: list[dict]):
+        self._clear_if_need() # todo должна зачищаться даже если не было записи
         self.instance().insert_many(documents)
