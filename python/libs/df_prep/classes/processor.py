@@ -15,11 +15,14 @@ class ProcessorParam(Generic[TParamType]):
     ):
         self.title = title
         self.description = description
-        self.value = value
+        self._value = value
         self.readOnly = readOnly
 
-    def get(self):
-        return self.value
+    def get(self) -> TParamType:
+        return self._value
+
+    def set(self, value: TParamType):
+        self._value = value
 
 
 class Secret:
