@@ -3,6 +3,7 @@ import enum
 from typing import Callable, TYPE_CHECKING
 from .storage import DbReader, DbWriter
 
+
 class ParamType(enum.Enum):
     STRING = "string"
     SECRET = "secret"
@@ -34,8 +35,10 @@ class CollectionInfo:
         self.title = title
         self.description = description
 
+
 def _default_action(params: Task):
     print(f"Processor {params.processor.name} has no action defined")
+
 
 class Processor:
     # system: System
@@ -122,11 +125,18 @@ class Task:
         return DbWriter(self.outputs[name])
 
     def run(self):
+        print(f"Start processor {self.processor.name} task")
+        print(f"inputs:{self.inputs}")
+        print(f"params:{self.params}")
+        print(f"outputs:{self.outputs}")
         self.processor.action(self)
+        print(f"Processor {self.processor.name} task finished")
+
+
 
 
 # class System:
-    
+
 #     def __init__(self):
 #         self.processors = dict[str, any]()
 
@@ -136,12 +146,3 @@ class Task:
 #         processor = Processor(name, title, description)
 #         self.processors[name] = processor
 #         return processor
-
-
-
-
-
-
-
-
-
