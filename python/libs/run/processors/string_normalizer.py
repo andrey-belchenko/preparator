@@ -6,14 +6,14 @@ processor = system.create_processor(
     description="Удаление лишних пробелов, табуляции и переводов строки во всех полях коллекции.",
 )
 
-processor.add_output(name="input", title="Коллекция источник")
-processor.add_output(name="output", title="Целевая коллекция")
+processor.add_output(name="input1", title="Коллекция источник")
+processor.add_output(name="output1", title="Целевая коллекция")
 
 
 def action(task: Task):
-    items = task.get_input_reader("input").read_all()
+    items = task.get_input_reader("input1").read_all()
      # todo реализовать логику обработки и вставку порциями
-    items = task.get_output_writer("output").write_many(items)
+    items = task.get_output_writer("output1").write_many(items)
 
 processor.set_action(action)
 

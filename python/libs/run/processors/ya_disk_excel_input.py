@@ -21,7 +21,7 @@ processor.add_param(
     title="Токен для доступа к API Яндекс Диск",
     description="Получить токен можно на странице https://yandex.ru/dev/disk/poligon/",
 )
-processor.add_output(name="output", title="Целевая коллекция")
+processor.add_output(name="output1", title="Целевая коллекция")
 
 
 def action(task: Task):
@@ -31,7 +31,7 @@ def action(task: Task):
     file_data = yandex_disk.download_file(api_token, file_path)
     excel_file = pd.read_excel(file_data)
     items = excel_file.to_dict("records")
-    output_writer = task.get_output_writer("output")
+    output_writer = task.get_output_writer("output1")
     output_writer.write_many(items)
     print(f"file {file_path} data loaded into '{output_writer.name}' collection")
 

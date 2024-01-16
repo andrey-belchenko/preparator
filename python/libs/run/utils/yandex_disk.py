@@ -16,7 +16,6 @@ def download_file(token: str, file_path: str) -> io.BytesIO:
         headers=headers,
     )
     if response.status_code == 200:
-        # Parse the JSON response and get the download link
         json_response = response.json()
         download_link = json_response["href"]
         response = requests.get(download_link, stream=True)
