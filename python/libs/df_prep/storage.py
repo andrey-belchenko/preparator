@@ -1,9 +1,6 @@
 from pymongo import MongoClient
 from pymongo.database import Database as MongoDatabase
 from pymongo.collection import Collection
-from df_prep.config import config
-
-
 
 
 
@@ -11,7 +8,8 @@ class DbConnection:
     def __init__(self, connectionString: str = None):
         self.connectionString = connectionString
         if self.connectionString == None:
-            self.connectionString = config.db_connection_string
+            from .system import system
+            self.connectionString = system.db_connection_string
         self._instance = None
 
     def instance(self) -> MongoClient:
@@ -25,7 +23,8 @@ class Database:
         self.name = name
         self.connection = connection
         if self.name == None:
-            self.name = config.db_name
+            from .system import system
+            self.name = system.db_name
         if self.connection == None:
             self.connection = DbConnection()
         self._instance = None

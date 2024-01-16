@@ -1,13 +1,7 @@
 from __future__ import annotations
 import enum
 from typing import Callable, TYPE_CHECKING
-
-from df_prep.classes.storage import DbReader, DbWriter
-
-
-if TYPE_CHECKING:
-    from system import System
-
+from .storage import DbReader, DbWriter
 
 class ParamType(enum.Enum):
     STRING = "string"
@@ -40,9 +34,11 @@ class CollectionInfo:
         self.title = title
         self.description = description
 
+def _default_action(params: Task):
+    print(f"Processor {params.processor.name} has no action defined")
 
 class Processor:
-    system: System
+    # system: System
 
     def __init__(self, name: str, title=None, description=None):
         self.name = name
@@ -105,10 +101,10 @@ class Task:
         self.params[name] = value
 
     def set_input(self, name: str, collection_name: any):
-        self.params[name] = collection_name
+        self.inputs[name] = collection_name
 
     def set_output(self, name: str, collection_name: any):
-        self.params[name] = collection_name
+        self.outputs[name] = collection_name
 
     def get_param(self, name: str):
         return self.params[name]
@@ -123,27 +119,29 @@ class Task:
         return DbReader(self.inputs[name])
 
     def get_output_writer(self, name: str) -> DbWriter:
-        return DbWriter(self.inputs[name])
+        return DbWriter(self.outputs[name])
 
-    def execute(self):
+    def run(self):
         self.processor.action(self)
 
 
-def _default_action(params: Task):
-    print(f"Processor {params.processor.name} has no action defined")
+# class System:
+    
+#     def __init__(self):
+#         self.processors = dict[str, any]()
+
+#     def create_processor(self, name: str, title=None, description=None):
+#         if name in self.processors:
+#             raise Exception(f"duplicated processor name {name}")
+#         processor = Processor(name, title, description)
+#         self.processors[name] = processor
+#         return processor
 
 
-def action(params: Task):
-    print("yep")
-    print("done")
 
 
-# processor = Processor("MyProc")
-# processor.add_param("par1")
-# processor.add_param("par2")
 
-# processor.set_action(action)
-# task = processor.create_task()
-# task.execute()
 
-# processor.execute(Task())
+
+
+

@@ -1,36 +1,15 @@
-# import typing
-# from df_prep import Processor
-
-# from run.processors import *
+from df_prep import system, Task
 
 
-# def get_all_subclasses(cls):
-#     subclasses = cls.__subclasses__()
-#     all_subclasses = subclasses
-#     for subclass in subclasses:
-#         all_subclasses += get_all_subclasses(subclass)
-#     return all_subclasses
-
-# all_subclasses = get_all_subclasses(Processor)
-
-# for sub_class in all_subclasses:
-#     print(sub_class)
-#     actual_t = typing.get_args(sub_class)[0]  # Get the actual T type argument
-#     print(actual_t)  # Output: <class 'int'>
-# # print(all_subclasses)  # Prints all subclasses, including indirect ones
+def action(params: Task):
+    print("yep")
+    print("done")
 
 
+processor = system.create_processor("MyProc")
+processor.add_param("par1")
+processor.add_param("par2")
 
-from typing import TypeVar, Generic
-import typing
-
-T = TypeVar('T')
-
-class BaseClass(Generic[T]):
-    pass
-
-class Subclass(BaseClass[int]):  # Specifying T as int
-    pass
-
-actual_t = typing.get_args(Subclass()) # Get the actual T type argument
-print(actual_t)  # Output: <class 'int'>
+processor.set_action(action)
+task = processor.create_task()
+task.run()

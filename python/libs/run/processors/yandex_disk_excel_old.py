@@ -16,9 +16,8 @@ class YandexDiskExcelInputParams(ProcessorParams):
         self.target = ProcessorParam[DbWriter](title="Целевая коллекция")
 
 
-class YandexDiskExcelInput(Processor[any]):
+class YandexDiskExcelInput(Processor[YandexDiskExcelInputParams]):
     def __init__(self):
-        self.params = YandexDiskExcelInputParams()
         self.title = "Входящий коннектор. Яндекс Диск. Excel файл"
         self.description = "Читает Excel файл из Яндекс Диска и записывает данные 1-го листа в коллекцию (предварительно коллекция зачищается). 1-я строка файла содержит заголовки полей."
 
