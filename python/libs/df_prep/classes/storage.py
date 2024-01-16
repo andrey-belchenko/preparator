@@ -4,17 +4,7 @@ from pymongo.collection import Collection
 from df_prep.config import config
 
 
-client = MongoClient("localhost", 27017)
 
-
-db = client["mydatabase"]
-collection = db["mycollection"]
-
-# Create a dictionary
-my_dict = {"name": "John", "age": 30, "city": "New York"}
-
-# Insert the dictionary into the collection
-collection.insert_one(my_dict)
 
 
 class DbConnection:
