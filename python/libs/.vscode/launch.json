@@ -12,6 +12,20 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": { "PYTHONPATH": "${workspaceFolder}/" }
+        },
+        {
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "api/app.py"  // Replace "app.py" with your actual file name
+            },
+            "args": [
+                "run",
+                "--no-debugger"
+            ],
+            "jinja": true
         }
     ]
 }

@@ -1,0 +1,1 @@
+from .siber import main

@@ -5,11 +5,11 @@ from pymongo.collection import Collection
 
 
 class DbConnection:
-    def __init__(self, connectionString: str = None):
+    def __init__(self, connectionString):
         self.connectionString = connectionString
-        if self.connectionString == None:
-            from .system import system
-            self.connectionString = system.db_connection_string
+        # if self.connectionString == None:
+        #     from .system import system
+        #     self.connectionString = system.db_connection_string
         self._instance = None
 
     def instance(self) -> MongoClient:
@@ -19,14 +19,14 @@ class DbConnection:
 
 
 class Database:
-    def __init__(self, name: str = None, connection: DbConnection = None):
+    def __init__(self, name: str, connection: DbConnection):
         self.name = name
         self.connection = connection
-        if self.name == None:
-            from .system import system
-            self.name = system.db_name
-        if self.connection == None:
-            self.connection = DbConnection()
+        # if self.name == None:
+        #     from .system import system
+        #     self.name = system.db_name
+        # if self.connection == None:
+        #     self.connection = DbConnection()
         self._instance = None
 
     def instance(self) -> MongoDatabase:
@@ -36,11 +36,11 @@ class Database:
 
 
 class DbCollection:
-    def __init__(self, collectionName: str, database: Database = None):
+    def __init__(self, collectionName: str, database: Database):
         self.name = collectionName
         self.database = database
-        if self.database == None:
-            self.database = Database()
+        # if self.database == None:
+        #     self.database = Database()
         self._instance = None
 
     def instance(self) -> Collection:

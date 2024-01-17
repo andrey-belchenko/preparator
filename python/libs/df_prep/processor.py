@@ -1,7 +1,7 @@
 from __future__ import annotations
 import enum
 from typing import Callable, TYPE_CHECKING
-from .storage import DbReader, DbWriter
+from .storage import Database, DbConnection, DbReader, DbWriter
 
 
 class ParamType(enum.Enum):
@@ -40,10 +40,25 @@ def _default_action(params: Task):
     print(f"Processor {params.processor.name} has no action defined")
 
 
-class Processor:
-    # system: System
+class Module:
+    def __init__(self):
+        self.processors = dict[str, Processor]()
+        self.db_con_str = ""
+        self.db_name = ""
 
-    def __init__(self, name: str, title=None, description=None):
+    def create_processor(self, name: str, title=None, description=None):
+        if name in self.processors:
+            raise Exception(f"duplicated processor name {name}")
+        processor = Processor(self, name, title, description)
+        self.processors[name] = processor
+        return processor
+
+    def get_processor(self, name: str):
+        return self.processors[name]
+
+
+class Processor:
+    def __init__(self, module: Module, name: str, title=None, description=None):
         self.name = name
         self.title = title
         self.description = description
@@ -51,6 +66,7 @@ class Processor:
         self.inputs = dict[str, CollectionInfo]()
         self.outputs = dict[str, CollectionInfo]()
         self.action = _default_action
+        self.module = module
 
     def add_param(
         self,
@@ -118,11 +134,14 @@ class Task:
     def get_number_param(self, name: str) -> float:
         return self.get_param(name)
 
+    def _get_database(self):
+        return Database(self.processor.module.db_name, DbConnection(self.processor.module.db_con_str))
+
     def get_input_reader(self, name: str) -> DbReader:
-        return DbReader(self.inputs[name])
+        return DbReader(self.inputs[name], self._get_database())
 
     def get_output_writer(self, name: str) -> DbWriter:
-        return DbWriter(self.outputs[name])
+        return DbWriter(self.outputs[name], self._get_database())
 
     def run(self):
         print(f"Start processor {self.processor.name} task")
@@ -131,8 +150,6 @@ class Task:
         print(f"outputs:{self.outputs}")
         self.processor.action(self)
         print(f"Processor {self.processor.name} task finished")
-
-
 
 
 # class System:

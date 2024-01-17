@@ -7,6 +7,6 @@
 # from .classes.storage import DbReader
 # from .classes.storage import DbWriter
 from .processor import Task
-from .system import system
+from .processor import Module
 from .processor import ParamType
 
