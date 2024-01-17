@@ -1,4 +1,2 @@
-from api.root import items
-
-
-items.append("siber","more")
+def main():
+    return {"items": ["aaa1", "bbbb1", "ccc"]}
