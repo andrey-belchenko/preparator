@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "outDir": "out",
+    "moduleResolution":"node",
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "baseUrl": "src",
+    // "paths": {
+    //   "src/*": ["./src/*"],
+    //   "_sys/*": ["./src/_sys/*"],
+    //   "rules/*": ["./src/rules/*"]
+    // }
+  }
+}
