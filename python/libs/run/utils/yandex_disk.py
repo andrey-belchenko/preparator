@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 
 def download_file(token: str, file_path: str) -> io.BytesIO:
+    file_path = file_path.replace("\\","/")
     print (f"downloading {file_path}")
     encoded_file_path = quote(file_path)
     headers = {

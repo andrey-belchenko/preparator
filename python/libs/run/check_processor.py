@@ -11,7 +11,7 @@ task = processor.create_task()
 task.set_input_data(
     "params",
     {
-        "file_path": "МРСК/Разное/Пример данных для загрузки/Пример1.xlsx",
+        "file_path": "МРСК\Разное\Пример данных для загрузки\Пример1.xlsx",
         "api_token": "y0_AgAEA7qjwkyUAADLWwAAAAD4F9e5CBIdi4wZTfa5hXBxUhCHwbcg6T8",
     },
 )
