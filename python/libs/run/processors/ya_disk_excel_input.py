@@ -9,22 +9,32 @@ def create(module: Module):
         title="Входящий коннектор. Яндекс Диск. Excel файл",
         description="Читает Excel файл из Яндекс Диска и записывает данные 1-го листа в коллекцию (предварительно коллекция зачищается). 1-я строка файла содержит заголовки полей.",
     )
-    processor.add_param(
-        name="file_path",
-        title="Путь к файлу",
-        description="Относительный путь от корневой папки Яндекс Диска",
-    )
-    processor.add_param(
-        name="api_token",
-        type=ParamType.SECRET,
-        title="Токен для доступа к API Яндекс Диск",
-        description="Получить токен можно на странице https://yandex.ru/dev/disk/poligon/",
-    )
-    processor.add_output(name="output1", title="Целевая коллекция")
+
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "title": "Путь к файлу",
+                "description": "Относительный путь от корневой папки Яндекс Диска",
+            },
+            "api_token": {
+                "type": "string",
+                "title": "Токен для доступа к API Яндекс Диск",
+                "description": "Получить токен можно на странице https://yandex.ru/dev/disk/poligon/",
+                "secret": True,
+            },
+        },
+    }
+
+    processor.add_input("params", title="Параметры", schema=schema)
+    processor.add_output("output", title="Целевая коллекция")
 
     def action(task: Task):
-        file_path = task.get_param("file_path")
-        api_token = task.get_param("api_token")
+        params = task.get_input_reader("params").read_one()
+        file_path = params["file_path"]
+        api_token = params["api_token"]
         file_data = yandex_disk.download_file(api_token, file_path)
         excel_file = pd.read_excel(file_data)
         items = excel_file.to_dict("records")

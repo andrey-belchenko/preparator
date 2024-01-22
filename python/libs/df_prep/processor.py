@@ -1,7 +1,7 @@
 from __future__ import annotations
 import enum
 from typing import Callable, TYPE_CHECKING
-from .storage import Database, DbConnection, DbReader, DbWriter
+from .storage import Database, DbConnection, DbReader, DbWriter, MemoryReader
 
 
 class ParamType(enum.Enum):
@@ -85,11 +85,13 @@ class Processor:
         name: str,
         title: str = None,
         description: str = None,
+        schema: dict[str, any] = None,
     ):
         item = CollectionInfo(name, title, description)
         if name in self.inputs:
             raise Exception(f"duplicated input name {name} in processor {self.name}")
         self.inputs[name] = item
+        self.schema = schema
 
     def add_output(
         self,
@@ -112,42 +114,58 @@ class Processor:
 class Task:
     def __init__(self, processor: Processor):
         self.processor = processor
-        self.params = dict[str, any]()
-        self.inputs = dict[str, str]()
-        self.outputs = dict[str, str]()
+        # self.params = dict[str, any]()
+        self.inputBinding = dict[str, str]()
+        self.inputData = dict[str, list[dict[str, any]]]()
+        self.outputBinding = dict[str, str]()
 
-    def set_param(self, name: str, value: any):
-        self.params[name] = value
+    # def set_param(self, name: str, value: any):
+    #     self.params[name] = value
 
-    def set_input(self, name: str, collection_name: any):
-        self.inputs[name] = collection_name
+    def set_input_collection(self, name: str, collection_name: any):
+        self.inputBinding[name] = collection_name
 
-    def set_output(self, name: str, collection_name: any):
-        self.outputs[name] = collection_name
+    def set_output_collection(self, input_name: str, collection_name: any):
+        self.outputBinding[input_name] = collection_name
 
-    def get_param(self, name: str):
-        return self.params[name]
+    def set_input_data(self, input_name: str, data: list[dict[str, any]]):
+        self.outputBinding[input_name] = data
 
-    def get_string_param(self, name: str) -> str:
-        return self.get_param(name)
+    # def get_param(self, name: str):
+    #     return self.params[name]
 
-    def get_number_param(self, name: str) -> float:
-        return self.get_param(name)
+    # def get_string_param(self, name: str) -> str:
+    #     return self.get_param(name)
+
+    # def get_number_param(self, name: str) -> float:
+    #     return self.get_param(name)
 
     def _get_database(self):
-        return Database(self.processor.module.db_name, DbConnection(self.processor.module.db_con_str))
+        return Database(
+            self.processor.module.db_name,
+            DbConnection(self.processor.module.db_con_str),
+        )
 
-    def get_input_reader(self, name: str) -> DbReader:
-        return DbReader(self.inputs[name], self._get_database())
+    def get_input_reader(self, input_name: str) -> DbReader | MemoryReader:
+        if input_name in self.inputBinding:
+            return DbReader(self.inputBinding[input_name], self._get_database())
+        elif input_name in self.inputData:
+            return MemoryReader(self.inputData[input_name])
+        else:
+            raise Exception(f"Input {input_name} is not bound")
 
-    def get_output_writer(self, name: str) -> DbWriter:
-        return DbWriter(self.outputs[name], self._get_database())
+    def get_output_writer(self, output_name: str) -> DbWriter:
+        if output_name in self.outputBinding:
+            return DbWriter(self.outputBinding[output_name], self._get_database())
+        else:
+            raise Exception(f"Output {output_name} is not bound")
 
     def run(self):
         print(f"Start processor {self.processor.name} task")
-        print(f"inputs:{self.inputs}")
-        print(f"params:{self.params}")
-        print(f"outputs:{self.outputs}")
+        print(f"inputBinding:{self.inputBinding}")
+        print(f"inputBinding:{self.inputData}")
+        # print(f"params:{self.params}")
+        print(f"outputBinding:{self.outputBinding}")
         self.processor.action(self)
         print(f"Processor {self.processor.name} task finished")
 

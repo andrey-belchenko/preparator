@@ -3,7 +3,6 @@ from pymongo.database import Database as MongoDatabase
 from pymongo.collection import Collection
 
 
-
 class DbConnection:
     def __init__(self, connectionString):
         self.connectionString = connectionString
@@ -56,17 +55,29 @@ class DbReader(DbCollection):
     def read_all(self):
         return self.instance().find({})
 
+    def read_one(self):
+        return self.instance().find_one({})
+
+
+class MemoryReader:
+    def __init__(self, data: list[dict[str, any]]):
+        self.data = data
+
+    def read_all(self):
+        return self.data
+
+    def read_one(self) -> any | None:
+        if len(self.data) == 0:
+            return None
+        return self.data[0]
+
 
 class DbWriter(DbCollection):
     def __init__(self, collectionName: str, database: Database = None):
         super().__init__(collectionName, database)
-        self._cleared = False
-    
-    def _clear_if_need(self):
-        if not self._cleared:
-            self.instance().delete_many({})
-            self._cleared = True
+
+    def clear(self):
+        self.instance().delete_many({})
 
     def write_many(self, documents: list[dict]):
-        self._clear_if_need() # todo должна зачищаться даже если не было записи
         self.instance().insert_many(documents)
