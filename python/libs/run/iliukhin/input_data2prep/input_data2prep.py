@@ -7,10 +7,10 @@ from transform import transform_rs, transform_supa
 from run.utils import yandex_disk
 
 
-with open("params.yml", "r", encoding="UTF-8") as f:
-    params = yaml.full_load(f)
+folder = r"C:\Users\andre\YandexDisk\МРСК\Разное\Пример данных для загрузки\siberia"
+mongo_connection = "mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017"
+connection = MongoClient(mongo_connection)
 
-connection = MongoClient(params["mongo_connection"])
 
 def insert_collection(db_name, col_name, df):
     db = connection[db_name]
@@ -19,7 +19,6 @@ def insert_collection(db_name, col_name, df):
     col.insert_many(df.to_dict("records"))
     print(f"{col_name} collection inserted into {db_name} database")
 
-folder = r"C:\Users\andre\YandexDisk\МРСК\Разное\Пример данных для загрузки\siberia"
 
 def insert_collection(db_name, col_name, df):
     db = connection[db_name]

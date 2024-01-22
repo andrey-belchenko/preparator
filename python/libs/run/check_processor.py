@@ -15,7 +15,6 @@ task.set_input_data(
         "api_token": "y0_AgAEA7qjwkyUAADLWwAAAAD4F9e5CBIdi4wZTfa5hXBxUhCHwbcg6T8",
     },
 )
-
 task.set_output_collection("output", "incoming_data1")
 task.run()
 
