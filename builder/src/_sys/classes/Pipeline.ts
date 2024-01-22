@@ -7,8 +7,13 @@ export interface SimpleLookupOptions {
   as: FieldName;
 }
 
+export interface CrossLookupOptions {
+  from: CollectionName | any;
+  as: FieldName;
+}
+
 export interface AdvancedLookupOptions {
-  from: CollectionName;
+  from: CollectionName | any; // any
   let?: Fields;
   pipeline: StepDefinition[];
   as: FieldName;
@@ -25,7 +30,7 @@ export interface GraphLookupOptions {
   restrictSearchWithMatch?: Expression;
 }
 
-export type LookupOptions = SimpleLookupOptions | AdvancedLookupOptions;
+export type LookupOptions = SimpleLookupOptions | AdvancedLookupOptions | CrossLookupOptions;
 // from: <joined collection>,
 //        let: { <var_1>: <expression>, …, <var_n>: <expression> },
 //        pipeline: [ <pipeline to run on joined collection> ],
