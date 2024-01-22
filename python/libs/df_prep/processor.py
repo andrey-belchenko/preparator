@@ -1,6 +1,6 @@
 from __future__ import annotations
 import enum
-from typing import Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 from .storage import Database, DbConnection, DbReader, DbWriter, MemoryReader
 
 
@@ -85,7 +85,7 @@ class Processor:
         name: str,
         title: str = None,
         description: str = None,
-        schema: dict[str, any] = None,
+        schema: dict[str, Any] = None,
     ):
         item = CollectionInfo(name, title, description)
         if name in self.inputs:
@@ -116,20 +116,30 @@ class Task:
         self.processor = processor
         # self.params = dict[str, any]()
         self.inputBinding = dict[str, str]()
-        self.inputData = dict[str, list[dict[str, any]]]()
+        self.inputData = dict[str, list[dict[str, Any]]]()
         self.outputBinding = dict[str, str]()
 
     # def set_param(self, name: str, value: any):
     #     self.params[name] = value
 
-    def set_input_collection(self, name: str, collection_name: any):
-        self.inputBinding[name] = collection_name
+    def set_input_collection(self, input_name: str, collection_name: Any):
+        if not input_name in self.processor.inputs:
+            raise Exception(f"Input '{input_name}' is not declared")
+        self.inputBinding[input_name] = collection_name
 
-    def set_output_collection(self, input_name: str, collection_name: any):
-        self.outputBinding[input_name] = collection_name
+    def set_output_collection(self, output_name: str, collection_name: Any):
+        if not output_name in self.processor.outputs:
+            raise Exception(f"Output '{output_name}' is not declared")
+        self.outputBinding[output_name] = collection_name
 
-    def set_input_data(self, input_name: str, data: list[dict[str, any]]):
-        self.outputBinding[input_name] = data
+    def set_input_data(
+        self, input_name: str, data: list[dict[str, Any]] | dict[str, Any]
+    ):
+        if not input_name in self.processor.inputs:
+            raise Exception(f"Input '{input_name}' is not declared")
+        if isinstance(data, dict):
+            data = [data]
+        self.inputData[input_name] = data
 
     # def get_param(self, name: str):
     #     return self.params[name]
@@ -147,18 +157,22 @@ class Task:
         )
 
     def get_input_reader(self, input_name: str) -> DbReader | MemoryReader:
+        if not input_name in self.processor.inputs:
+            raise Exception(f"Input '{input_name}' is not declared")
         if input_name in self.inputBinding:
             return DbReader(self.inputBinding[input_name], self._get_database())
         elif input_name in self.inputData:
             return MemoryReader(self.inputData[input_name])
         else:
-            raise Exception(f"Input {input_name} is not bound")
+            raise Exception(f"Input '{input_name}' is not bound")
 
     def get_output_writer(self, output_name: str) -> DbWriter:
+        if not output_name in self.processor.outputs:
+            raise Exception(f"Output '{output_name}' is not declared")
         if output_name in self.outputBinding:
             return DbWriter(self.outputBinding[output_name], self._get_database())
         else:
-            raise Exception(f"Output {output_name} is not bound")
+            raise Exception(f"Output '{output_name}' is not bound")
 
     def run(self):
         print(f"Start processor {self.processor.name} task")
