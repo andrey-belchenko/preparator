@@ -30,13 +30,26 @@ def load_supa_data(file_name, collection_name):
     input_task.run()
 
 
-load_supa_data("Substation_supa.xlsx", "Substation_supa")
-
-# print(module.get_processor("ya_disk_excel_input").defined_in_file)
+# load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
 
 
-# processor = module.get_processor("string_normalizer")
-# task = processor.create_task()
-# task.set_input_collection("input", "incoming_data1")
-# task.set_output_collepction("output", "processed_data")
-# task.run()
+def load_rs_data(file_name, collection_name, columns):
+    input_processor = module.get_processor("ya_disk_csv_input")
+    input_task = input_processor.create_task()
+    params = ya_disk_params.copy()
+    params["columns"] = columns
+    params["file_path"] = file_name
+    input_task.set_input_data("params", params)
+    input_task.set_output_collection("output", collection_name)
+    input_task.run()
+
+# load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
+load_rs_data(
+    "Substation_rs.csv",
+    "Substation_rs_input",
+    {
+        "IRI": "Uid",
+        "name": "name",
+        "Region": "Substations",
+    },
+)

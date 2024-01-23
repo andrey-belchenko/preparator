@@ -1,6 +1,6 @@
 import pandas as pd
 from df_prep.processor import Task
-from run.utils import yandex_disk
+from run.utils import data_frame, yandex_disk
 
 
 input_params_schema = {
@@ -25,6 +25,7 @@ input_params_schema = {
             "secret": True,
             "required": True,
         },
+        "columns": {"additionalProperties": {"type": "string"}},
     },
 }
 
@@ -35,6 +36,10 @@ def action(task: Task, get_data_frame_func):
     api_token = params["api_token"]
     file_data = yandex_disk.download_file(api_token, file_path)
     df = get_data_frame_func(file_data)
+    df = data_frame.clear_column_names(df)
+    columns = params["columns"]
+    if columns != None:
+        df = data_frame.select_columns(df, columns)
     items = df.to_dict("records")
     output_writer = task.get_output_writer("output")
     output_writer.clear()

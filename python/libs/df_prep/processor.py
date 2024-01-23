@@ -44,7 +44,11 @@ def _default_action(params: Task):
 
 def _get_source_file_name():
     caller_frame = inspect.stack()[3]
-    return caller_frame.filename.replace(os.getcwd(), "").replace("\\", "/").rstrip("/")[1:]
+    return (
+        caller_frame.filename.replace(os.getcwd(), "")
+        .replace("\\", "/")
+        .rstrip("/")[1:]
+    )
 
 
 class Module:
@@ -56,12 +60,14 @@ class Module:
 
     def create_processor(self, name: str, title=None, description=None):
         if name in self.processors:
-            raise Exception(f"duplicated processor name {name}")
+            raise Exception(f"duplicated processor name '{name}'")
         processor = Processor(self, name, title, description)
         self.processors[name] = processor
         return processor
 
     def get_processor(self, name: str):
+        if name not in self.processors:
+            raise Exception(f"processor '{name}' is not defined")
         return self.processors[name]
 
 
