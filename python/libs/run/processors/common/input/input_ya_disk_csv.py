@@ -1,7 +1,7 @@
 from run.utils import excel, yandex_disk
 import pandas as pd
 from df_prep import Module
-from .utils import ya_disk_input
+from .utils import input_ya_disk
 
 
 def create(module: Module):
@@ -13,4 +13,4 @@ def create(module: Module):
     def read_data(data):
         return pd.read_csv(data, sep=";")
 
-    ya_disk_input.configure(processor, read_data)
+    input_ya_disk.configure(processor, read_data)

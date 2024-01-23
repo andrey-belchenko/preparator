@@ -4,9 +4,17 @@ import requests
 from urllib.parse import quote
 
 
-def select_columns(df: pd.DataFrame, columns):
-    df = df[columns.keys()]
-    df = df.rename(columns=columns)
+def select_columns(df: pd.DataFrame, columns: dict):
+    revCols = {}
+    for it in columns:
+        revCols[columns[it]] = it
+    df = df[revCols.keys()]
+    df = df.rename(columns=revCols)
+    return df
+
+
+def add_columns_with_const_values(df: pd.DataFrame, columns: dict):
+    df = df.assign(**columns)
     return df
 
 

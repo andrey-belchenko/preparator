@@ -62,23 +62,61 @@ class DbReader(DbCollection):
 
 class MemoryReader:
     def __init__(self, data: list[dict[str, Any]]):
-        self.data = data
+        self._data = data
 
     def read_all(self):
-        return self.data
+        return self._data
 
     def read_one(self) -> Any | None:
-        if len(self.data) == 0:
+        if len(self._data) == 0:
             return None
-        return self.data[0]
+        return self._data[0]
 
 
 class DbWriter(DbCollection):
     def __init__(self, collectionName: str, database: Database = None):
         super().__init__(collectionName, database)
+        self._count = 0
+        self._closed = True
+
+    def get_info(self):
+        return f"collection '{self.name}'"
 
     def clear(self):
         self.instance().delete_many({})
 
     def write_many(self, documents: list[dict]):
         self.instance().insert_many(documents)
+        self._count += len(documents)
+        self._closed = False
+
+    def close(self):
+        self._closed = True
+        print (f"loaded {self._count} documents into {self.get_info()}")
+
+    def is_closed(self):
+        return self._closed
+
+class MemoryWriter:
+    def __init__(self, data: list[dict[str, Any]]):
+        self._data = data
+        self._count = 0
+        self._closed = True
+        
+    def get_info(self):
+        return f"list[]"
+
+    def clear(self):
+        self._data.clear()
+
+    def write_many(self, documents: list[dict]):
+        self._data.extend(documents)
+        self._count += len(documents)
+        self._closed = False
+
+    def close(self):
+        print (f"loaded {self._count} documents into {self.get_info()}")
+        self._closed = True
+
+    def is_closed(self):
+        return self._closed

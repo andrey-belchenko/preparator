@@ -1,6 +1,7 @@
 import os
 from main import create_module
-from run.processors.common.input import input_ya_disk_excel, input_ya_disk_csv
+from run.processors.common.input import input_ya_disk_csv, input_ya_disk_excel
+from run.processors.siber import clear_rs_data
 
 
 module = create_module()
@@ -15,34 +16,39 @@ ya_disk_params = {
 
 
 def load_supa_data(file_name, collection_name):
-    task = module.get_processor(input_ya_disk_excel).create_task()
+    task = module.create_task(input_ya_disk_excel)
     ya_disk_params["file_path"] = file_name
-    task.set_params_input_data(ya_disk_params)
-    task.set_default_output_collection(collection_name)
+    task.bind_params(ya_disk_params)
+    task.bind_output(collection_name)
     task.run()
 
 
-def load_rs_data(file_name, collection_name, columns):
-    task = module.get_processor(input_ya_disk_csv).create_task()
+def load_rs_data(file_name, collection_name, selectFields, addFields=None):
+    task = module.create_task(input_ya_disk_csv)
     params = ya_disk_params.copy()
-    params["columns"] = columns
+    params["selectFields"] = selectFields
+    params["addFields"] = addFields
     params["file_path"] = file_name
-    task.set_params_input_data(params)
-    task.set_default_output_collection(collection_name)
+    task.bind_params(params)
+    data = []
+    task.bind_output(data)
+    task.run()
+
+    task = module.create_task(clear_rs_data)
+    task.bind_input(data)
+    task.bind_output(collection_name)
     task.run()
 
 
-# aa= input_ya_disk_excel
-# print(module.get_processor("input_ya_disk_csv").defined_in_file)
-# print(input_ya_disk_excel.__name__)
 
 load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
 load_rs_data(
     "Substation_rs.csv",
     "Substation_rs_input",
     {
-        "IRI": "Uid",
+        "Uid": "IRI",
         "name": "name",
-        "Region": "Substations",
+        "Region": "Region",
     },
+    {"Класс": "Substation"},
 )

@@ -2,7 +2,14 @@ from __future__ import annotations
 import enum
 import os
 from typing import Any, Callable, TYPE_CHECKING
-from .storage import Database, DbConnection, DbReader, DbWriter, MemoryReader
+from .storage import (
+    Database,
+    DbConnection,
+    DbReader,
+    DbWriter,
+    MemoryReader,
+    MemoryWriter,
+)
 import inspect
 
 
@@ -75,6 +82,9 @@ class Module:
             raise Exception(f"processor '{name}' is not defined")
         return self.processors[name]
 
+    def create_task(self, processor_info: str | Module):
+        return self.get_processor(processor_info).create_task()
+
 
 class Processor:
     def __init__(self, module: Module, title=None, description=None):
@@ -100,6 +110,17 @@ class Processor:
         self.inputs[name] = item
         self.schema = schema
 
+    def add_named_output(
+        self,
+        name: str,
+        title: str = None,
+        description: str = None,
+    ):
+        item = PortInfo(name, title, description)
+        if name in self.outputs:
+            raise Exception(f"duplicated output name {name} in processor {self.name}")
+        self.outputs[name] = item
+
     def add_default_input(
         self,
         title: str = "Вход",
@@ -115,17 +136,6 @@ class Processor:
         schema: dict[str, Any] = None,
     ):
         self.add_named_input("params", title, description, schema)
-
-    def add_named_output(
-        self,
-        name: str,
-        title: str = None,
-        description: str = None,
-    ):
-        item = PortInfo(name, title, description)
-        if name in self.inputs:
-            raise Exception(f"duplicated output name {name} in processor {self.name}")
-        self.outputs[name] = item
 
     def add_default_output(
         self,
@@ -145,43 +155,42 @@ class Processor:
 class Task:
     def __init__(self, processor: Processor):
         self.processor = processor
-        self.inputBinding = dict[str, str]()
-        self.inputData = dict[str, list[dict[str, Any]]]()
-        self.outputBinding = dict[str, str]()
+        self.inputBinding = dict[str, str | list[dict[str, Any]] | dict[str, Any]]()
+        self.outputBinding = dict[str, str | str | list[dict[str, Any]]]()
+        self._writers = dict[str, DbWriter | MemoryWriter]()
 
-    def set_named_input_collection(self, input_name: str, collection_name: Any):
+    def _remove_input_binging(self, name: str):
+        if name in self.inputBinding:
+            del self.inputBinding[name]
+
+    def _remove_output_binging(self, name: str):
+        if name in self.outputBinding:
+            del self.outputBinding[name]
+
+    def bind_named_input(
+        self, input_name: str, source: list[dict[str, Any]] | dict[str, Any] | str
+    ):
+        self._remove_input_binging(input_name)
         if not input_name in self.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
-        self.inputBinding[input_name] = collection_name
+        if isinstance(source, list):
+            source = source.copy()
+        self.inputBinding[input_name] = source
 
-    def set_named_output_collection(self, output_name: str, collection_name: Any):
+    def bind_named_output(self, output_name: str, target: list[dict[str, Any]] | str):
+        self._remove_output_binging(output_name)
         if not output_name in self.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
-        self.outputBinding[output_name] = collection_name
+        self.outputBinding[output_name] = target
 
-    def set_named_input_data(
-        self, input_name: str, data: list[dict[str, Any]] | dict[str, Any]
-    ):
-        if not input_name in self.processor.inputs:
-            raise Exception(f"Input '{input_name}' is not declared")
-        if isinstance(data, dict):
-            data = [data]
-        self.inputData[input_name] = data
+    def bind_params(self, source: list[dict[str, Any]] | dict[str, Any] | str):
+        self.bind_named_input("params", source)
 
-    def set_params_input_data(self, data: list[dict[str, Any]] | dict[str, Any]):
-        self.set_named_input_data("params", data)
+    def bind_input(self, source: list[dict[str, Any]] | dict[str, Any] | str):
+        self.bind_named_input("default", source)
 
-    def set_params_input_collection(self, collection_name: Any):
-        self.set_named_input_collection("params", collection_name)
-
-    def set_default_input_data(self, data: list[dict[str, Any]] | dict[str, Any]):
-        self.set_named_input_data("default", data)
-
-    def set_default_input_collection(self, collection_name: Any):
-        self.set_named_input_collection("default", collection_name)
-
-    def set_default_output_collection(self, collection_name: Any):
-        self.set_named_output_collection("default", collection_name)
+    def bind_output(self, target: list[dict[str, Any]] | str):
+        self.bind_named_output("default", target)
 
     def _get_database(self):
         return Database(
@@ -192,34 +201,64 @@ class Task:
     def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
-        if input_name in self.inputBinding:
-            return DbReader(self.inputBinding[input_name], self._get_database())
-        elif input_name in self.inputData:
-            return MemoryReader(self.inputData[input_name])
+        source = self.inputBinding[input_name]
+        if isinstance(source, str):
+            return DbReader(source, self._get_database())
         else:
-            raise Exception(f"Input '{input_name}' is not bound")
+            if isinstance(source, dict):
+                source = [source]
+            return MemoryReader(source)
 
-    def get_default_output_reader(self) -> DbReader | MemoryReader:
+    def get_named_output_writer(self, output_name: str) -> DbWriter:
+        if not output_name in self.processor.outputs:
+            raise Exception(f"Output '{output_name}' is not declared")
+        target = self.outputBinding[output_name]
+        if not output_name in self._writers:
+            if isinstance(target, str):
+                val = DbWriter(target, self._get_database())
+            else:
+                if isinstance(target, dict):
+                    target = [target]
+                val = MemoryWriter(target)
+            self._writers[output_name] = val
+        return self._writers[output_name]
+
+    def get_input_reader(self) -> DbReader | MemoryReader:
         return self.get_named_input_reader("default")
 
     def get_params_reader(self) -> DbReader | MemoryReader:
         return self.get_named_input_reader("params")
 
-    def get_named_output_writer(self, output_name: str) -> DbWriter:
-        if not output_name in self.processor.outputs:
-            raise Exception(f"Output '{output_name}' is not declared")
-        if output_name in self.outputBinding:
-            return DbWriter(self.outputBinding[output_name], self._get_database())
-        else:
-            raise Exception(f"Output '{output_name}' is not bound")
-
-    def get_default_output_writer(self) -> DbWriter:
+    def get_output_writer(self) -> DbWriter:
         return self.get_named_output_writer("default")
 
+    def _print_bindings(self, bindings: list):
+        for name in bindings:
+            val = bindings[name]
+        text = ""
+        if isinstance(val, str):
+            text = val
+        elif isinstance(val, dict):
+            text = str(val)
+        else:
+            text = "list[]"
+        print(name + ":" + text)
+
     def run(self):
-        print(f"Start processor {self.processor.name} task")
-        print(f"inputBinding:{self.inputBinding}")
-        print(f"inputData:{self.inputData}")
-        print(f"outputBinding:{self.outputBinding}")
+        print("")
+        print(f"Start processor '{self.processor.name}' task")
+        print("input")
+        self._print_bindings(self.inputBinding)
+        print("")
+        print("output")
+        self._print_bindings(self.outputBinding)
+        print("")
         self.processor.action(self)
-        print(f"Processor {self.processor.name} task finished")
+        for name in self._writers:
+            if not self._writers[name].is_closed():
+                raise Exception(
+                    f"Writer '{name}' in processor '{self.processor.name}' was not closed. Use writer.close() when writing is finished"
+                )
+
+        print(f"Processor '{self.processor.name}' task finished")
+        print("")

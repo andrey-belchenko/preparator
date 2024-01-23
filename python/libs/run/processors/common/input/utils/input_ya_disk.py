@@ -26,7 +26,16 @@ def configure(processor: Processor, get_data_frame_func):
                 "secret": True,
                 "required": True,
             },
-            "columns": {"additionalProperties": {"type": "string"}},
+            "selectFields": {
+                "title": "Выбрать и переименовать поля для загрузки",
+                "description": r'Формат JSON {"Целевое поле":"Поле в файле",...}',
+                "additionalProperties": {"type": "string"},
+            },
+            "addFields": {
+                "title": "Добавить поля",
+                "description": r'Формат JSON {"Целевое поле":"Константа",...}',
+                "additionalProperties": {"type": "string"},
+            },
         },
     }
     processor.add_params_input(schema=schema)
@@ -34,17 +43,20 @@ def configure(processor: Processor, get_data_frame_func):
 
     def action(task: Task):
         params = task.get_params_reader().read_one()
-        file_path = params["folder_path"] + "/" + params["file_path"]
+        path = params["folder_path"] + "/" + params["file_path"]
         api_token = params["api_token"]
-        file_data = yandex_disk.download_file(api_token, file_path)
+        file_data = yandex_disk.download_file(api_token, path)
         df = get_data_frame_func(file_data)
         df = data_frame.clear_column_names(df)
-        if "columns" in params:
-            df = data_frame.select_columns(df, params["columns"])
+        if "selectFields" in params:
+            df = data_frame.select_columns(df, params["selectFields"])
+        if "addFields" in params:
+            df = data_frame.add_columns_with_const_values(df, params["addFields"])
+        df = df.drop_duplicates()
         items = df.to_dict("records")
-        output_writer = task.get_default_output_writer()
-        output_writer.clear()
-        output_writer.write_many(items)
-        print(f"file {file_path} data loaded into '{output_writer.name}' collection")
+        writer = task.get_output_writer()
+        writer.clear()
+        writer.write_many(items)
+        writer.close()
 
     processor.set_action(action)
