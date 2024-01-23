@@ -3,7 +3,6 @@ from df_prep import Task, Module
 
 def create(module: Module):
     processor = module.create_processor(
-        name="string_normalizer",
         title="Нормализация строк",
         description="Удаление лишних пробелов, табуляции и переводов строки во всех полях коллекции.",
     )

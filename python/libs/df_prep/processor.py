@@ -58,23 +58,28 @@ class Module:
         self.db_con_str = ""
         self.db_name = ""
 
-    def create_processor(self, name: str, title=None, description=None):
-        if name in self.processors:
-            raise Exception(f"duplicated processor name '{name}'")
-        processor = Processor(self, name, title, description)
-        self.processors[name] = processor
+    def create_processor(self, title=None, description=None):
+        processor = Processor(self, title, description)
+        if processor.name in self.processors:
+            raise Exception(f"duplicated processor name '{processor.name}'")
+        self.processors[processor.name] = processor
         return processor
 
-    def get_processor(self, name: str):
+    def get_processor(self, info: str | Module):
+        name = ""
+        if isinstance(info, str):
+            name = info
+        else:
+            name = info.__name__.rsplit(".", 1)[-1]
         if name not in self.processors:
             raise Exception(f"processor '{name}' is not defined")
         return self.processors[name]
 
 
 class Processor:
-    def __init__(self, module: Module, name: str, title=None, description=None):
+    def __init__(self, module: Module, title=None, description=None):
         self.defined_in_file = _get_source_file_name()
-        self.name = name
+        self.name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
         self.title = title
         self.description = description
         self.inputs = dict[str, PortInfo]()

@@ -6,7 +6,6 @@ from .utils import ya_disk_input
 
 def create(module: Module):
     processor = module.create_processor(
-        name="ya_disk_csv_input",
         title="Входящий коннектор. Яндекс Диск. CSV файл",
         description="Читает CSV файл из Яндекс Диска и записывает данные в коллекцию (предварительно коллекция зачищается)",
     )

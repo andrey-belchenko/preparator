@@ -6,7 +6,6 @@ from .utils import ya_disk_input
 
 def create(module: Module):
     processor = module.create_processor(
-        name="ya_disk_excel_input",
         title="Входящий коннектор. Яндекс Диск. Excel файл",
         description="Читает Excel файл из Яндекс Диска и записывает данные 1-го листа в коллекцию (предварительно коллекция зачищается). 1-я строка файла содержит заголовки полей.",
     )
