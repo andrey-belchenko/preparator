@@ -1,5 +1,5 @@
-import os
-from main import create_module
+
+from run.main import create_module
 from run.processors.common.input import input_ya_disk_csv, input_ya_disk_excel
 from run.processors.siber import clear_rs_data
 
