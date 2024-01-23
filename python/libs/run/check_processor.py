@@ -13,37 +13,23 @@ ya_disk_params = {
 }
 
 
-# input_processor = module.get_processor("ya_disk_excel_input")
-# input_task = input_processor.create_task()
-# ya_disk_params["file_path"] = os.path.join(folder, "Substation_supa.xlsx")
-# input_task.set_input_data("params", ya_disk_params)
-# input_task.set_output_collection("output", "incoming_data1")
-# input_task.run()
-
-
 def load_supa_data(file_name, collection_name):
-    input_processor = module.get_processor("ya_disk_excel_input")
-    input_task = input_processor.create_task()
+    task = module.get_processor("ya_disk_excel_input").create_task()
     ya_disk_params["file_path"] = file_name
-    input_task.set_input_data("params", ya_disk_params)
-    input_task.set_output_collection("output", collection_name)
-    input_task.run()
-
-
-# load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
+    task.set_input_data("params", ya_disk_params)
+    task.set_output_collection("output", collection_name)
+    task.run()
 
 
 def load_rs_data(file_name, collection_name, columns):
-    input_processor = module.get_processor("ya_disk_csv_input")
-    input_task = input_processor.create_task()
+    task = module.get_processor("ya_disk_csv_input").create_task()
     params = ya_disk_params.copy()
     params["columns"] = columns
     params["file_path"] = file_name
-    input_task.set_input_data("params", params)
-    input_task.set_output_collection("output", collection_name)
-    input_task.run()
+    task.set_input_data("params", params)
+    task.set_output_collection("output", collection_name)
+    task.run()
 
-# load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
 load_rs_data(
     "Substation_rs.csv",
     "Substation_rs_input",
