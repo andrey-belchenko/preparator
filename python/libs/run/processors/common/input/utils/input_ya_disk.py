@@ -1,6 +1,6 @@
 import pandas as pd
 from df_prep.processor import Module, Processor, Task
-from run.utils import data_frame, yandex_disk
+from run.processors.utils import data_frame, yandex_disk
 
 
 def configure(processor: Processor, get_data_frame_func):

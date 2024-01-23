@@ -13,25 +13,6 @@ from .storage import (
 import inspect
 
 
-# class ParamType(enum.Enum):
-#     STRING = "string"
-#     SECRET = "secret"
-#     NUMBER = "number"
-
-
-# class Param:
-#     def __init__(
-#         self,
-#         name: str,
-#         type: ParamType = ParamType.STRING,
-#         title: str = None,
-#         description: str = None,
-#     ):
-#         self.name = name
-#         self.type = type
-#         self.title = title
-#         self.description = description
-
 
 class PortInfo:
     def __init__(
@@ -242,15 +223,15 @@ class Task:
             text = str(val)
         else:
             text = "list[]"
-        print(name + ":" + text)
+        print("- "+name + ": " + text)
 
     def run(self):
         print("")
         print(f"Start processor '{self.processor.name}' task")
-        print("input")
+        print("inputs")
         self._print_bindings(self.inputBinding)
         print("")
-        print("output")
+        print("outputs")
         self._print_bindings(self.outputBinding)
         print("")
         self.processor.action(self)

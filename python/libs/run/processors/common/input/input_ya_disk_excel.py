@@ -1,6 +1,5 @@
-from run.utils import excel, yandex_disk
-import pandas as pd
-from df_prep import Task, Module
+from run.processors.utils import excel
+from df_prep import Module
 from .utils import input_ya_disk
 
 
@@ -11,4 +10,3 @@ def create(module: Module):
     )
 
     input_ya_disk.configure(processor, excel.read_excel)
-   
