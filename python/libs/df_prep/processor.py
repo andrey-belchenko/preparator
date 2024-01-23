@@ -6,27 +6,27 @@ from .storage import Database, DbConnection, DbReader, DbWriter, MemoryReader
 import inspect
 
 
-class ParamType(enum.Enum):
-    STRING = "string"
-    SECRET = "secret"
-    NUMBER = "number"
+# class ParamType(enum.Enum):
+#     STRING = "string"
+#     SECRET = "secret"
+#     NUMBER = "number"
 
 
-class Param:
-    def __init__(
-        self,
-        name: str,
-        type: ParamType = ParamType.STRING,
-        title: str = None,
-        description: str = None,
-    ):
-        self.name = name
-        self.type = type
-        self.title = title
-        self.description = description
+# class Param:
+#     def __init__(
+#         self,
+#         name: str,
+#         type: ParamType = ParamType.STRING,
+#         title: str = None,
+#         description: str = None,
+#     ):
+#         self.name = name
+#         self.type = type
+#         self.title = title
+#         self.description = description
 
 
-class CollectionInfo:
+class PortInfo:
     def __init__(
         self,
         name: str,
@@ -77,47 +77,58 @@ class Processor:
         self.name = name
         self.title = title
         self.description = description
-        self.params = dict[str, Param]()
-        self.inputs = dict[str, CollectionInfo]()
-        self.outputs = dict[str, CollectionInfo]()
+        self.inputs = dict[str, PortInfo]()
+        self.outputs = dict[str, PortInfo]()
         self.action = _default_action
         self.module = module
 
-    def add_param(
-        self,
-        name: str,
-        type: ParamType = ParamType.STRING,
-        title: str = None,
-        description: str = None,
-    ):
-        param = Param(name, type, title, description)
-        if name in self.params:
-            raise Exception(f"duplicated param name {name} in processor {self.name}")
-        self.params[name] = param
-
-    def add_input(
+    def add_named_input(
         self,
         name: str,
         title: str = None,
         description: str = None,
         schema: dict[str, Any] = None,
     ):
-        item = CollectionInfo(name, title, description)
+        item = PortInfo(name, title, description)
         if name in self.inputs:
             raise Exception(f"duplicated input name {name} in processor {self.name}")
         self.inputs[name] = item
         self.schema = schema
 
-    def add_output(
+    def add_default_input(
+        self,
+        title: str = "Вход",
+        description: str = None,
+        schema: dict[str, Any] = None,
+    ):
+        self.add_named_input("default", title, description, schema)
+
+    def add_params_input(
+        self,
+        title: str = "Параметры",
+        description: str = None,
+        schema: dict[str, Any] = None,
+    ):
+        self.add_named_input("params", title, description, schema)
+
+    def add_named_output(
         self,
         name: str,
         title: str = None,
         description: str = None,
     ):
-        item = CollectionInfo(name, title, description)
+        item = PortInfo(name, title, description)
         if name in self.inputs:
             raise Exception(f"duplicated output name {name} in processor {self.name}")
         self.outputs[name] = item
+
+    def add_default_output(
+        self,
+        title: str = "Выход",
+        description: str = None,
+        schema: dict[str, Any] = None,
+    ):
+        self.add_named_output("default", title, description)
 
     def set_action(self, action: Callable[[str], None]):
         self.action = action
@@ -129,25 +140,21 @@ class Processor:
 class Task:
     def __init__(self, processor: Processor):
         self.processor = processor
-        # self.params = dict[str, any]()
         self.inputBinding = dict[str, str]()
         self.inputData = dict[str, list[dict[str, Any]]]()
         self.outputBinding = dict[str, str]()
 
-    # def set_param(self, name: str, value: any):
-    #     self.params[name] = value
-
-    def set_input_collection(self, input_name: str, collection_name: Any):
+    def set_named_input_collection(self, input_name: str, collection_name: Any):
         if not input_name in self.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
         self.inputBinding[input_name] = collection_name
 
-    def set_output_collection(self, output_name: str, collection_name: Any):
+    def set_named_output_collection(self, output_name: str, collection_name: Any):
         if not output_name in self.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
         self.outputBinding[output_name] = collection_name
 
-    def set_input_data(
+    def set_named_input_data(
         self, input_name: str, data: list[dict[str, Any]] | dict[str, Any]
     ):
         if not input_name in self.processor.inputs:
@@ -156,14 +163,20 @@ class Task:
             data = [data]
         self.inputData[input_name] = data
 
-    # def get_param(self, name: str):
-    #     return self.params[name]
+    def set_params_input_data(self, data: list[dict[str, Any]] | dict[str, Any]):
+        self.set_named_input_data("params", data)
 
-    # def get_string_param(self, name: str) -> str:
-    #     return self.get_param(name)
+    def set_params_input_collection(self, collection_name: Any):
+        self.set_named_input_collection("params", collection_name)
 
-    # def get_number_param(self, name: str) -> float:
-    #     return self.get_param(name)
+    def set_default_input_data(self, data: list[dict[str, Any]] | dict[str, Any]):
+        self.set_named_input_data("default", data)
+
+    def set_default_input_collection(self, collection_name: Any):
+        self.set_named_input_collection("default", collection_name)
+
+    def set_default_output_collection(self, collection_name: Any):
+        self.set_named_output_collection("default", collection_name)
 
     def _get_database(self):
         return Database(
@@ -171,7 +184,7 @@ class Task:
             DbConnection(self.processor.module.db_con_str),
         )
 
-    def get_input_reader(self, input_name: str) -> DbReader | MemoryReader:
+    def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
         if input_name in self.inputBinding:
@@ -181,7 +194,13 @@ class Task:
         else:
             raise Exception(f"Input '{input_name}' is not bound")
 
-    def get_output_writer(self, output_name: str) -> DbWriter:
+    def get_default_output_reader(self) -> DbReader | MemoryReader:
+        return self.get_named_input_reader("default")
+
+    def get_params_reader(self) -> DbReader | MemoryReader:
+        return self.get_named_input_reader("params")
+
+    def get_named_output_writer(self, output_name: str) -> DbWriter:
         if not output_name in self.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
         if output_name in self.outputBinding:
@@ -189,24 +208,13 @@ class Task:
         else:
             raise Exception(f"Output '{output_name}' is not bound")
 
+    def get_default_output_writer(self) -> DbWriter:
+        return self.get_named_output_writer("default")
+
     def run(self):
         print(f"Start processor {self.processor.name} task")
         print(f"inputBinding:{self.inputBinding}")
-        print(f"inputBinding:{self.inputData}")
-        # print(f"params:{self.params}")
+        print(f"inputData:{self.inputData}")
         print(f"outputBinding:{self.outputBinding}")
         self.processor.action(self)
         print(f"Processor {self.processor.name} task finished")
-
-
-# class System:
-
-#     def __init__(self):
-#         self.processors = dict[str, any]()
-
-#     def create_processor(self, name: str, title=None, description=None):
-#         if name in self.processors:
-#             raise Exception(f"duplicated processor name {name}")
-#         processor = Processor(name, title, description)
-#         self.processors[name] = processor
-#         return processor

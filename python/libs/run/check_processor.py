@@ -16,8 +16,8 @@ ya_disk_params = {
 def load_supa_data(file_name, collection_name):
     task = module.get_processor("ya_disk_excel_input").create_task()
     ya_disk_params["file_path"] = file_name
-    task.set_input_data("params", ya_disk_params)
-    task.set_output_collection("output", collection_name)
+    task.set_params_input_data(ya_disk_params)
+    task.set_default_output_collection(collection_name)
     task.run()
 
 
@@ -26,10 +26,11 @@ def load_rs_data(file_name, collection_name, columns):
     params = ya_disk_params.copy()
     params["columns"] = columns
     params["file_path"] = file_name
-    task.set_input_data("params", params)
-    task.set_output_collection("output", collection_name)
+    task.set_params_input_data(params)
+    task.set_default_output_collection(collection_name)
     task.run()
 
+load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
 load_rs_data(
     "Substation_rs.csv",
     "Substation_rs_input",

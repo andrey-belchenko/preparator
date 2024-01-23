@@ -8,5 +8,4 @@
 # from .classes.storage import DbWriter
 from .processor import Task
 from .processor import Module
-from .processor import ParamType
 
