@@ -1,5 +1,5 @@
 from df_prep import Module
-from processors import ya_disk_excel_input
+from processors.common.input import ya_disk_excel_input
 from processors import string_normalizer
 
 def create_module():

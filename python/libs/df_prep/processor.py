@@ -1,7 +1,9 @@
 from __future__ import annotations
 import enum
+import os
 from typing import Any, Callable, TYPE_CHECKING
 from .storage import Database, DbConnection, DbReader, DbWriter, MemoryReader
+import inspect
 
 
 class ParamType(enum.Enum):
@@ -40,8 +42,14 @@ def _default_action(params: Task):
     print(f"Processor {params.processor.name} has no action defined")
 
 
+def _get_source_file_name():
+    caller_frame = inspect.stack()[3]
+    return caller_frame.filename.replace(os.getcwd(), "").replace("\\", "/").rstrip("/")[1:]
+
+
 class Module:
     def __init__(self):
+        self.defined_in_file = _get_source_file_name()
         self.processors = dict[str, Processor]()
         self.db_con_str = ""
         self.db_name = ""
@@ -59,6 +67,7 @@ class Module:
 
 class Processor:
     def __init__(self, module: Module, name: str, title=None, description=None):
+        self.defined_in_file = _get_source_file_name()
         self.name = name
         self.title = title
         self.description = description
