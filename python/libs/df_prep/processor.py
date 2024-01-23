@@ -138,7 +138,6 @@ class Task:
         self.processor = processor
         self.inputBinding = dict[str, str | list[dict[str, Any]] | dict[str, Any]]()
         self.outputBinding = dict[str, str | str | list[dict[str, Any]]]()
-        self._writers = dict[str, DbWriter | MemoryWriter]()
 
     def _remove_input_binging(self, name: str):
         if name in self.inputBinding:
@@ -173,46 +172,6 @@ class Task:
     def bind_output(self, target: list[dict[str, Any]] | str):
         self.bind_named_output("default", target)
 
-    def _get_database(self):
-        return Database(
-            self.processor.module.db_name,
-            DbConnection(self.processor.module.db_con_str),
-        )
-
-    def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
-        if not input_name in self.processor.inputs:
-            raise Exception(f"Input '{input_name}' is not declared")
-        source = self.inputBinding[input_name]
-        if isinstance(source, str):
-            return DbReader(source, self._get_database())
-        else:
-            if isinstance(source, dict):
-                source = [source]
-            return MemoryReader(source)
-
-    def get_named_output_writer(self, output_name: str) -> DbWriter:
-        if not output_name in self.processor.outputs:
-            raise Exception(f"Output '{output_name}' is not declared")
-        target = self.outputBinding[output_name]
-        if not output_name in self._writers:
-            if isinstance(target, str):
-                val = DbWriter(target, self._get_database())
-            else:
-                if isinstance(target, dict):
-                    target = [target]
-                val = MemoryWriter(target)
-            self._writers[output_name] = val
-        return self._writers[output_name]
-
-    def get_input_reader(self) -> DbReader | MemoryReader:
-        return self.get_named_input_reader("default")
-
-    def get_params_reader(self) -> DbReader | MemoryReader:
-        return self.get_named_input_reader("params")
-
-    def get_output_writer(self) -> DbWriter:
-        return self.get_named_output_writer("default")
-
     def _print_bindings(self, bindings: list):
         for name in bindings:
             val = bindings[name]
@@ -234,12 +193,62 @@ class Task:
         print("outputs")
         self._print_bindings(self.outputBinding)
         print("")
-        self.processor.action(self)
-        for name in self._writers:
-            if not self._writers[name].is_closed():
+        task_context =  TaskContext(self) 
+        self.processor.action(task_context)
+        for name in task_context._writers:
+            if not task_context._writers[name].is_closed():
                 raise Exception(
                     f"Writer '{name}' in processor '{self.processor.name}' was not closed. Use writer.close() when writing is finished"
                 )
 
         print(f"Processor '{self.processor.name}' task finished")
         print("")
+
+
+class TaskContext:
+    def __init__(self, task: Task):
+        self.task = task
+        self._writers = dict[str, DbWriter | MemoryWriter]()
+
+        self.bind_named_output("default", target)
+
+    def _get_database(self):
+        return Database(
+            self.task.processor.module.db_name,
+            DbConnection(self.task.processor.module.db_con_str),
+        )
+
+    def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
+        if not input_name in self.task.processor.inputs:
+            raise Exception(f"Input '{input_name}' is not declared")
+        source = self.task.inputBinding[input_name]
+        if isinstance(source, str):
+            return DbReader(source, self._get_database())
+        else:
+            if isinstance(source, dict):
+                source = [source]
+            return MemoryReader(source)
+
+    def get_named_output_writer(self, output_name: str) -> DbWriter:
+        if not output_name in self.task.processor.outputs:
+            raise Exception(f"Output '{output_name}' is not declared")
+        target = self.task.outputBinding[output_name]
+        if not output_name in self._writers:
+            if isinstance(target, str):
+                val = DbWriter(target, self._get_database())
+            else:
+                if isinstance(target, dict):
+                    target = [target]
+                val = MemoryWriter(target)
+            self._writers[output_name] = val
+        return self._writers[output_name]
+
+    def get_input_reader(self) -> DbReader | MemoryReader:
+        return self.get_named_input_reader("default")
+
+    def get_params_reader(self) -> DbReader | MemoryReader:
+        return self.get_named_input_reader("params")
+
+    def get_output_writer(self) -> DbWriter:
+        return self.get_named_output_writer("default")
+
