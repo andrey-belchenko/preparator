@@ -136,16 +136,16 @@ class Processor:
 class Task:
     def __init__(self, processor: Processor):
         self.processor = processor
-        self.inputBinding = dict[str, str | list[dict[str, Any]] | dict[str, Any]]()
-        self.outputBinding = dict[str, str | str | list[dict[str, Any]]]()
+        self._inputBinding = dict[str, str | list[dict[str, Any]] | dict[str, Any]]()
+        self._outputBinding = dict[str, str | str | list[dict[str, Any]]]()
 
     def _remove_input_binging(self, name: str):
-        if name in self.inputBinding:
-            del self.inputBinding[name]
+        if name in self._inputBinding:
+            del self._inputBinding[name]
 
     def _remove_output_binging(self, name: str):
-        if name in self.outputBinding:
-            del self.outputBinding[name]
+        if name in self._outputBinding:
+            del self._outputBinding[name]
 
     def bind_named_input(
         self, input_name: str, source: list[dict[str, Any]] | dict[str, Any] | str
@@ -155,13 +155,13 @@ class Task:
             raise Exception(f"Input '{input_name}' is not declared")
         if isinstance(source, list):
             source = source.copy()
-        self.inputBinding[input_name] = source
+        self._inputBinding[input_name] = source
 
     def bind_named_output(self, output_name: str, target: list[dict[str, Any]] | str):
         self._remove_output_binging(output_name)
         if not output_name in self.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
-        self.outputBinding[output_name] = target
+        self._outputBinding[output_name] = target
 
     def bind_params(self, source: list[dict[str, Any]] | dict[str, Any] | str):
         self.bind_named_input("params", source)
@@ -188,10 +188,10 @@ class Task:
         print("")
         print(f"Start processor '{self.processor.name}' task")
         print("inputs")
-        self._print_bindings(self.inputBinding)
+        self._print_bindings(self._inputBinding)
         print("")
         print("outputs")
-        self._print_bindings(self.outputBinding)
+        self._print_bindings(self._outputBinding)
         print("")
         task_context =  TaskContext(self) 
         self.processor.action(task_context)
@@ -210,8 +210,6 @@ class TaskContext:
         self.task = task
         self._writers = dict[str, DbWriter | MemoryWriter]()
 
-        self.bind_named_output("default", target)
-
     def _get_database(self):
         return Database(
             self.task.processor.module.db_name,
@@ -221,7 +219,7 @@ class TaskContext:
     def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.task.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
-        source = self.task.inputBinding[input_name]
+        source = self.task._inputBinding[input_name]
         if isinstance(source, str):
             return DbReader(source, self._get_database())
         else:
@@ -232,7 +230,7 @@ class TaskContext:
     def get_named_output_writer(self, output_name: str) -> DbWriter:
         if not output_name in self.task.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
-        target = self.task.outputBinding[output_name]
+        target = self.task._outputBinding[output_name]
         if not output_name in self._writers:
             if isinstance(target, str):
                 val = DbWriter(target, self._get_database())

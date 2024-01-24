@@ -1,12 +1,14 @@
 import re
 import pandas as pd
-from df_prep import Task, Module
+from df_prep import Module, TaskContext
+
 
 def _clear_iri(text):
     match = re.findall("#.*", text)
     if match:
         res = match[0].replace('"', "").replace("#", "")
         return res
+
 
 def _transform_rs(df, equip_class):
     if equip_class == "PowerTransformer":
@@ -22,9 +24,9 @@ def _transform_rs(df, equip_class):
             )
         df["Uid"] = df["Uid"].apply(_clear_iri)
     if equip_class == "VoltageLevel":
-         # Фильтруем РУ RS без нейтрали, т.к. в supa только РУ
+        # Фильтруем РУ RS без нейтрали, т.к. в supa только РУ
         df = df[~((df["name"].str.contains("ейтраль")) | (df["name"] == "0"))]
-               
+
     df = df.drop_duplicates()
     return df
 
@@ -36,14 +38,14 @@ def create(module: Module):
     processor.add_default_input()
     processor.add_default_output()
 
-    def action(task: Task):
+    def action(task: TaskContext):
         items = list(task.get_input_reader().read_all())
-        writer =  task.get_output_writer()
+        writer = task.get_output_writer()
         writer.clear()
-        if (len(items)>0):
-            equip_class =  items[0]["Класс"]
+        if len(items) > 0:
+            equip_class = items[0]["Класс"]
             df = pd.DataFrame.from_dict(items)
-            df = _transform_rs(df,equip_class)
+            df = _transform_rs(df, equip_class)
             writer.write_many(df.to_dict("records"))
         writer.close()
 
