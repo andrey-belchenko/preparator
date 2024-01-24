@@ -290,8 +290,11 @@ def _match(df_rs, df_supa, df_old_matched):
     )
 
     # + сравнение с сопоставленными ранее
-    uids_unmatched = set(df_rs["Uid"])
-    uids_old_matched = set(df_old_matched["Uid"])
+    uids_unmatched = set(df_rs["Uid"])    
+    try:
+        uids_old_matched = set(df_old_matched['Uid'])
+    except KeyError:
+        uids_old_matched = set()
 
     res = []
 

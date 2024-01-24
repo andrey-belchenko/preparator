@@ -5,7 +5,7 @@ import os
 import re
 from transform import transform_rs, transform_supa
 
-with open('params.yml', 'r') as f:
+with open('params.yml', 'r', encoding="UTF-8") as f:
     params = yaml.full_load(f)
 
 connection = MongoClient(params['mongo_connection'])

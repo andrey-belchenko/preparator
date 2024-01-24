@@ -150,7 +150,12 @@ df_union = pd.concat([df_merge1[needed_cols], df_merge2[needed_cols]]).rename(co
 
 # + сравнение с сопоставленными ранее
 uids_unmatched = set(df_rs['Uid'])
-uids_old_matched = set(df_old_matched['Uid'])
+
+
+try:
+    uids_old_matched = set(df_old_matched['Uid'])
+except KeyError:
+    uids_old_matched = set()
 
 res = []
 

@@ -1,4 +1,4 @@
-mongo_connection: mongodb://root:sibarit@mongo.siber-sk.oastu.lan:27017/
+mongo_connection: mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017/
 input_directory: C:\Users\andre\YandexDisk\DataFabric\Прикладная разработка\Разное\Сибирь - Данные для сопоставления\current
 RS_columns:
 

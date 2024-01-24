@@ -1,4 +1,4 @@
-mongo_connection: mongodb://root:sibarit@mongo.siber-sk.oastu.lan:27017/
+mongo_connection: mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017/
 
 Substation:
   database: Substation
