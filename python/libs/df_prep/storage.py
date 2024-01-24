@@ -43,6 +43,9 @@ class DbCollection:
         #     self.database = Database()
         self._instance = None
 
+    def get_info(self):
+        return f"collection '{self.name}'"
+
     def instance(self) -> Collection:
         if self._instance == None:
             self._instance = self.database.instance()[self.name]
@@ -54,6 +57,9 @@ class DbReader(DbCollection):
         super().__init__(collectionName, database)
 
     def read_all(self):
+        print(
+            f"read {self.instance().count_documents({})} documents from {self.get_info()}"
+        )
         return self.instance().find({})
 
     def read_one(self):
@@ -64,7 +70,11 @@ class MemoryReader:
     def __init__(self, data: list[dict[str, Any]]):
         self._data = data
 
+    def get_info(self):
+        return f"list[]"
+    
     def read_all(self):
+        print(f"read {self._data.count()} documents from {self.get_info()}")
         return self._data
 
     def read_one(self) -> Any | None:
@@ -79,9 +89,6 @@ class DbWriter(DbCollection):
         self._count = 0
         self._closed = True
 
-    def get_info(self):
-        return f"collection '{self.name}'"
-
     def clear(self):
         self.instance().delete_many({})
 
@@ -92,17 +99,18 @@ class DbWriter(DbCollection):
 
     def close(self):
         self._closed = True
-        print (f"loaded {self._count} documents into {self.get_info()}")
+        print(f"loaded {self._count} documents into {self.get_info()}")
 
     def is_closed(self):
         return self._closed
+
 
 class MemoryWriter:
     def __init__(self, data: list[dict[str, Any]]):
         self._data = data
         self._count = 0
         self._closed = True
-        
+
     def get_info(self):
         return f"list[]"
 
@@ -115,7 +123,7 @@ class MemoryWriter:
         self._closed = False
 
     def close(self):
-        print (f"loaded {self._count} documents into {self.get_info()}")
+        print(f"loaded {self._count} documents into {self.get_info()}")
         self._closed = True
 
     def is_closed(self):

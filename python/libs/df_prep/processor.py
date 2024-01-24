@@ -13,17 +13,20 @@ from .storage import (
 import inspect
 
 
-
 class PortInfo:
     def __init__(
         self,
         name: str,
         title: str = None,
         description: str = None,
+        default_binding: str = None,
+        read_only: bool = False,
     ):
         self.name = name
         self.title = title
         self.description = description
+        self.default_binding = default_binding
+        self.read_only = read_only
 
 
 def _default_action(params: Task):
@@ -84,8 +87,10 @@ class Processor:
         title: str = None,
         description: str = None,
         schema: dict[str, Any] = None,
+        default_binding: str = None,
+        read_only: bool = False,
     ):
-        item = PortInfo(name, title, description)
+        item = PortInfo(name, title, description, default_binding, read_only)
         if name in self.inputs:
             raise Exception(f"duplicated input name {name} in processor {self.name}")
         self.inputs[name] = item
@@ -96,8 +101,10 @@ class Processor:
         name: str,
         title: str = None,
         description: str = None,
+        default_binding: str = None,
+        read_only: bool = False,
     ):
-        item = PortInfo(name, title, description)
+        item = PortInfo(name, title, description, default_binding, read_only)
         if name in self.outputs:
             raise Exception(f"duplicated output name {name} in processor {self.name}")
         self.outputs[name] = item
@@ -172,28 +179,43 @@ class Task:
     def bind_output(self, target: list[dict[str, Any]] | str):
         self.bind_named_output("default", target)
 
-    def _print_bindings(self, bindings: list):
-        for name in bindings:
-            val = bindings[name]
-        text = ""
-        if isinstance(val, str):
-            text = val
-        elif isinstance(val, dict):
-            text = str(val)
-        else:
-            text = "list[]"
-        print("- "+name + ": " + text)
+    def _print_bindings(self, ports: dict, bindings: dict):
+        for name in ports:
+            val = None
+            if name in bindings:
+                val = bindings[name]
+            text = ""
+            if val == None:
+                text = "null"
+            elif isinstance(val, str):
+                text = val
+            elif isinstance(val, dict):
+                text = str(val)
+            else:
+                text = "list[]"
+            print("- " + name + ": " + text)
+
+    def _apply_default_binding(self):
+        def apply( ports: dict[str,PortInfo], bindings: dict):
+            for name in ports:
+                if name not in bindings:
+                     port = ports[name]
+                     if port.default_binding!=None:
+                          bindings[name] =  port.default_binding
+        apply(self.processor.inputs, self._inputBinding)
+        apply(self.processor.outputs, self._outputBinding)
 
     def run(self):
         print("")
         print(f"Start processor '{self.processor.name}' task")
-        print("inputs")
-        self._print_bindings(self._inputBinding)
+        self._apply_default_binding()
+        print("input binding")
+        self._print_bindings(self.processor.inputs, self._inputBinding)
         print("")
-        print("outputs")
-        self._print_bindings(self._outputBinding)
+        print("output binding")
+        self._print_bindings(self.processor.outputs, self._outputBinding)
         print("")
-        task_context =  TaskContext(self) 
+        task_context = TaskContext(self)
         self.processor.action(task_context)
         for name in task_context._writers:
             if not task_context._writers[name].is_closed():
@@ -216,7 +238,7 @@ class TaskContext:
             DbConnection(self.task.processor.module.db_con_str),
         )
 
-    def get_named_input_reader(self, input_name: str) -> DbReader | MemoryReader:
+    def get_named_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.task.processor.inputs:
             raise Exception(f"Input '{input_name}' is not declared")
         source = self.task._inputBinding[input_name]
@@ -227,7 +249,7 @@ class TaskContext:
                 source = [source]
             return MemoryReader(source)
 
-    def get_named_output_writer(self, output_name: str) -> DbWriter:
+    def get_named_writer(self, output_name: str) -> DbWriter:
         if not output_name in self.task.processor.outputs:
             raise Exception(f"Output '{output_name}' is not declared")
         target = self.task._outputBinding[output_name]
@@ -241,12 +263,11 @@ class TaskContext:
             self._writers[output_name] = val
         return self._writers[output_name]
 
-    def get_input_reader(self) -> DbReader | MemoryReader:
-        return self.get_named_input_reader("default")
+    def get_reader(self) -> DbReader | MemoryReader:
+        return self.get_named_reader("default")
 
     def get_params_reader(self) -> DbReader | MemoryReader:
-        return self.get_named_input_reader("params")
+        return self.get_named_reader("params")
 
-    def get_output_writer(self) -> DbWriter:
-        return self.get_named_output_writer("default")
-
+    def get_writer(self) -> DbWriter:
+        return self.get_named_writer("default")

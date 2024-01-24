@@ -1,7 +1,6 @@
-
-from run.main import create_module
+from run.processors.main import create_module
 from run.processors.common.input import input_ya_disk_csv, input_ya_disk_excel
-from run.processors.siber import clear_rs_data
+from run.processors.siber import clear_rs_data, match_substation
 
 
 module = create_module()
@@ -40,15 +39,20 @@ def load_rs_data(file_name, collection_name, selectFields, addFields=None):
     task.run()
 
 
+def load_data_from_files():
+    load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
+    load_rs_data(
+        "Substation_rs.csv",
+        "Substation_rs_input",
+        {
+            "Uid": "IRI",
+            "name": "name",
+            "Substations": "Region",
+        },
+        {"Класс": "Substation"},
+    )
 
-load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
-load_rs_data(
-    "Substation_rs.csv",
-    "Substation_rs_input",
-    {
-        "Uid": "IRI",
-        "name": "name",
-        "Region": "Region",
-    },
-    {"Класс": "Substation"},
-)
+# load_data_from_files()
+
+task = module.create_task(match_substation)
+task.run()

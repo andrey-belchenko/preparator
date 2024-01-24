@@ -1,0 +1,94 @@
+mongo_connection: mongodb://root:sibarit@mongo.siber-sk.oastu.lan:27017/
+
+Substation:
+  database: Substation
+  input_collections:
+    RS: Substation_rs
+    SUPA: Substation_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched_before
+
+PowerTransformer:
+  database: PowerTransformer
+  input_collections:
+    RS: PowerTransformer_rs
+    SUPA: PowerTransformer_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+
+Line:
+  database: Line
+  input_collections:
+    RS: Line_rs
+    SUPA: Line_supa
+
+VoltageLevel:
+  database: VoltageLevel
+  input_collections:
+    RS: VoltageLevel_rs
+    SUPA: VoltageLevel_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+
+BusbarSection:
+  database: BusbarSection
+  input_collections:
+    RS: BusbarSection_rs
+    SUPA: BusbarSection_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+
+Bay:
+  database: Bay
+  input_collections:
+    RS: Bay_rs
+    SUPA: Bay_supa
+    extra_data:
+      database: VoltageLevel
+      collection: VoltageLevel_matched
+
+Disconnector:
+  database: Disconnector
+  input_collections:
+    RS: Disconnector_rs
+    SUPA: Disconnector_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+
+LinearShuntCompensator:
+  database: LinearShuntCompensator
+  input_collections:
+    RS: LinearShuntCompensator_rs
+    SUPA: LinearShuntCompensator_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+      
+StaticVarCompensator:
+  database: StaticVarCompensator
+  input_collections:
+    RS: StaticVarCompensator_rs
+    SUPA: StaticVarCompensator_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+      
+GroundDisconnector:
+  database: GroundDisconnector
+  input_collections:
+    RS: GroundDisconnector_rs
+    SUPA: GroundDisconnector_supa
+    extra_data:
+      database: Substation
+      collection: Substation_matched
+
+SomeClasses:
+  database: SomeClasses
+  input_collections:
+    SUPA: SomeClasses_supa
+

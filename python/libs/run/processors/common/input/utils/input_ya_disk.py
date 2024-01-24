@@ -54,7 +54,7 @@ def configure(processor: Processor, get_data_frame_func):
             df = data_frame.add_columns_with_const_values(df, params["addFields"])
         df = df.drop_duplicates()
         items = df.to_dict("records")
-        writer = task.get_output_writer()
+        writer = task.get_writer()
         writer.clear()
         writer.write_many(items)
         writer.close()
