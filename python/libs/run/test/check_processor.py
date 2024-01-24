@@ -5,11 +5,11 @@ from run.processors.siber import clear_rs_data, match_substation
 
 module = create_module()
 module.db_con_str = "mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017"
-module.db_name = "bav_test"
+module.db_name = "bav_test2"
 
 
 ya_disk_params = {
-    "folder_path": "МРСК\Разное\Пример данных для загрузки\siberia",
+    "folder_path": "DataFabric\Прикладная разработка\Разное\Сибирь - Данные для сопоставления\current",
     "api_token": "y0_AgAEA7qjwkyUAADLWwAAAAD4F9e5CBIdi4wZTfa5hXBxUhCHwbcg6T8",
 }
 
@@ -40,10 +40,10 @@ def load_rs_data(file_name, collection_name, selectFields, addFields=None):
 
 
 def load_data_from_files():
-    load_supa_data("Substation_supa.xlsx", "Substation_supa_input")
+    load_supa_data("Substation_supa.xlsx", "Substation_supa")
     load_rs_data(
         "Substation_rs.csv",
-        "Substation_rs_input",
+        "Substation_rs",
         {
             "Uid": "IRI",
             "name": "name",
@@ -52,7 +52,7 @@ def load_data_from_files():
         {"Класс": "Substation"},
     )
 
-# load_data_from_files()
+load_data_from_files()
 
 task = module.create_task(match_substation)
 task.run()

@@ -72,9 +72,9 @@ class MemoryReader:
 
     def get_info(self):
         return f"list[]"
-    
+
     def read_all(self):
-        print(f"read {self._data.count()} documents from {self.get_info()}")
+        print(f"read {len(self._data)} documents from {self.get_info()}")
         return self._data
 
     def read_one(self) -> Any | None:

@@ -14,11 +14,9 @@ def create(module: Module):
         title="Сибирь. Сопоставление подстанций",
     )
     class_name = "Substation"
+    processor.add_named_input("rs", "Данные РС", default_binding=f"{class_name}_rs")
     processor.add_named_input(
-        "rs", "Данные РС", default_binding=f"{class_name}_rs_input"
-    )
-    processor.add_named_input(
-        "supa", "Данные СУПА", default_binding=f"{class_name}_supa_input"
+        "supa", "Данные СУПА", default_binding=f"{class_name}_supa"
     )
     processor.add_named_input(
         "old_matched",
@@ -54,34 +52,23 @@ def create(module: Module):
             df_rs, df_supa, df_old_matched
         )
 
-        writer =  task.get_named_writer("matched")
-        writer.clear()
-        writer.write_many(df_matched.to_dict("records"))
-        writer.close()
+        def save(data, output_name):
+            writer = task.get_named_writer(output_name)
+            writer.clear()
+            writer.write_many(data.to_dict("records"))
+            writer.close()
 
-        writer =  task.get_named_writer("rs_unmatched")
-        writer.clear()
-        writer.write_many(df_rs_unmatched.to_dict("records"))
-        writer.close()
-
-        writer =  task.get_named_writer("supa_unmatched")
-        writer.clear()
-        writer.write_many(df_supa_unmatched.to_dict("records"))
-        writer.close()
-
-        writer =  task.get_named_writer("duplicates")
-        writer.clear()
-        writer.write_many(df_duplicates.to_dict("records"))
-        writer.close()
+        save(df_matched, "matched")
+        save(df_rs_unmatched, "rs_unmatched")
+        save(df_supa_unmatched, "supa_unmatched")
+        save(df_duplicates, "duplicates")
 
     processor.set_action(action)
 
 
-# with open('params.yml', 'r') as f:
-#     params = yaml.full_load(f)
-
-
 def _match(df_rs, df_supa, df_old_matched):
+    # with open('params.yml', 'r') as f:
+    #     params = yaml.full_load(f)
     # class_name = "Substation"
 
     be2region = {
@@ -129,8 +116,7 @@ def _match(df_rs, df_supa, df_old_matched):
     df_supa["БЕ"] = df_supa["БЕ"].astype("int")
     df_supa["region"] = df_supa["БЕ"].apply(lambda x: be2region.get(x))
 
-    print(df_supa)
-    # df_supa = df_supa.dropna(subset="region")
+    df_supa = df_supa.dropna(subset="region")
 
     # ручное
     df_supa.loc[
@@ -290,9 +276,9 @@ def _match(df_rs, df_supa, df_old_matched):
     )
 
     # + сравнение с сопоставленными ранее
-    uids_unmatched = set(df_rs["Uid"])    
+    uids_unmatched = set(df_rs["Uid"])
     try:
-        uids_old_matched = set(df_old_matched['Uid'])
+        uids_old_matched = set(df_old_matched["Uid"])
     except KeyError:
         uids_old_matched = set()
 
