@@ -52,27 +52,27 @@ def load_data_from_files():
         {"Класс": "Substation"},
     )
 
-    load_supa_data("VoltageLevel_supa.xlsx", "VoltageLevel_supa")
-    load_rs_data(
-        "VoltageLevel_rs.csv",
-        "VoltageLevel_rs",
-        {
-            "Uid": "_id|R",
-            "name": "IdentifiedObject.name|R",
-            "Класс": "class|R",
-            "Substation_Uid": "VoltageLevel.Substation|R",
-            "Substation_name": "IdentifiedObject.name|R-Sub",
-        },
-    )
+    # load_supa_data("VoltageLevel_supa.xlsx", "VoltageLevel_supa")
+    # load_rs_data(
+    #     "VoltageLevel_rs.csv",
+    #     "VoltageLevel_rs",
+    #     {
+    #         "Uid": "_id|R",
+    #         "name": "IdentifiedObject.name|R",
+    #         "Класс": "class|R",
+    #         "Substation_Uid": "VoltageLevel.Substation|R",
+    #         "Substation_name": "IdentifiedObject.name|R-Sub",
+    #     },
+    # )
 
 
 def run_matching():
     module.create_task(match_substation).run()
-    module.create_task(match_voltage_level).run()
+    # module.create_task(match_voltage_level).run()
 
 
 load_data_from_files()
-# run_matching()
+run_matching()
 
 
 
