@@ -1,5 +1,5 @@
 import pandas as pd
-from df_prep import Module, Processor, Task, TaskContext
+from df_prep import Module, Processor, Task, Task
 from run.processors.utils import data_frame, yandex_disk
 
 
@@ -41,7 +41,7 @@ def configure(processor: Processor, get_data_frame_func):
     processor.add_params_input(schema=schema)
     processor.add_default_output()
 
-    def action(task: TaskContext):
+    def action(task: Task):
         params = task.get_params_reader().read_one()
         path = params["folder_path"] + "/" + params["file_path"]
         api_token = params["api_token"]

@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from df_prep import Module, TaskContext
+from df_prep import Module, Task
 from run.processors.siber.utils.merge import merge_by_key_column
 from run.processors.siber.utils.match_common import configure_common_ports
 
@@ -23,7 +23,7 @@ def create(module: Module):
         default_binding=f"Substation_matched",
     )
 
-    def action(task: TaskContext):
+    def action(task: Task):
         df_rs = pd.DataFrame.from_dict(task.get_named_reader("rs").read_all())
         df_supa = pd.DataFrame.from_dict(task.get_named_reader("supa").read_all())
         df_Substation_matched = pd.DataFrame.from_dict(

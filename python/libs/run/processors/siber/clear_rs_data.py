@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from df_prep import Module, TaskContext
+from df_prep import Module, Task
 
 
 
@@ -13,7 +13,7 @@ def create(module: Module):
     processor.add_default_input()
     processor.add_default_output()
 
-    def action(task: TaskContext):
+    def action(task: Task):
         items = list(task.get_reader().read_all())
         writer = task.get_writer()
         writer.clear()
