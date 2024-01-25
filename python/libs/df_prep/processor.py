@@ -208,10 +208,13 @@ class Task:
         apply(self.processor.inputs, self._inputBinding)
         apply(self.processor.outputs, self._outputBinding)
 
+    def prepare(self):
+        self._apply_default_binding()
+
     def run(self):
         print("")
         print(f"Start processor '{self.processor.name}' task")
-        self._apply_default_binding()
+        self.prepare()
         print("input binding")
         self._print_bindings(self.processor.inputs, self._inputBinding)
         print("")
