@@ -1,45 +1,23 @@
 import pandas as pd
 import re
 from df_prep import Module, TaskContext
-from run.processors.siber.merge import merge_by_key_column
+from run.processors.siber.utils.merge import merge_by_key_column
+from run.processors.siber.utils.match_common import configure_common_ports
 
-
-# import yaml
-# from data_io import load_data_from_db, insert_collection_into_db
-# from merge import merge_by_key_column
 
 
 def create(module: Module):
     processor = module.create_processor(
         title="Сибирь. Сопоставление подстанций",
     )
+
     class_name = "Substation"
-    processor.add_named_input("rs", "Данные РС", default_binding=f"{class_name}_rs")
-    processor.add_named_input(
-        "supa", "Данные СУПА", default_binding=f"{class_name}_supa"
-    )
+    configure_common_ports(processor, "Substation")
+
     processor.add_named_input(
         "old_matched",
-        "Ранее сопоставленные данне",
+        "Ранее сопоставленные данные",
         default_binding=f"{class_name}_matched_before",
-    )
-    processor.add_named_output(
-        "matched", "Сопоставленные данные", default_binding=f"{class_name}_matched"
-    )
-    processor.add_named_output(
-        "rs_unmatched",
-        "Не сопоставленные РС",
-        default_binding=f"{class_name}_rs_unmatched",
-    )
-    processor.add_named_output(
-        "supa_unmatched",
-        "Не сопоставленные СУПА",
-        default_binding=f"{class_name}_supa_unmatched",
-    )
-    processor.add_named_output(
-        "duplicates",
-        "Не сопоставленные СУПА",
-        default_binding=f"{class_name}_duplicates",
     )
 
     def action(task: TaskContext):
@@ -67,6 +45,11 @@ def create(module: Module):
 
 
 def _match(df_rs, df_supa, df_old_matched):
+
+    # import yaml
+    # from data_io import load_data_from_db, insert_collection_into_db
+    # from merge import merge_by_key_column
+
     # with open('params.yml', 'r') as f:
     #     params = yaml.full_load(f)
     # class_name = "Substation"

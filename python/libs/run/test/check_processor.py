@@ -1,6 +1,6 @@
 from run.processors.main import create_module
 from run.processors.common.input import input_ya_disk_csv, input_ya_disk_excel
-from run.processors.siber import clear_rs_data, match_substation
+from run.processors.siber import clear_rs_data, match_substation, match_voltage_level
 
 
 module = create_module()
@@ -9,7 +9,7 @@ module.db_name = "bav_test2"
 
 
 ya_disk_params = {
-    "folder_path": "DataFabric\Прикладная разработка\Разное\Сибирь - Данные для сопоставления\current",
+    "folder_path": "DataFabric\Прикладная разработка\Разное\Сибирь - Данные для сопоставления\data1",
     "api_token": "y0_AgAEA7qjwkyUAADLWwAAAAD4F9e5CBIdi4wZTfa5hXBxUhCHwbcg6T8",
 }
 
@@ -52,7 +52,28 @@ def load_data_from_files():
         {"Класс": "Substation"},
     )
 
-load_data_from_files()
+    load_supa_data("VoltageLevel_supa.xlsx", "VoltageLevel_supa")
+    load_rs_data(
+        "VoltageLevel_rs.csv",
+        "VoltageLevel_rs",
+        {
+            "Uid": "_id|R",
+            "name": "IdentifiedObject.name|R",
+            "Класс": "class|R",
+            "Substation_Uid": "VoltageLevel.Substation|R",
+            "Substation_name": "IdentifiedObject.name|R-Sub",
+        },
+    )
 
-task = module.create_task(match_substation)
-task.run()
+
+def run_matching():
+    module.create_task(match_substation).run()
+    module.create_task(match_voltage_level).run()
+
+
+load_data_from_files()
+# run_matching()
+
+
+
+
