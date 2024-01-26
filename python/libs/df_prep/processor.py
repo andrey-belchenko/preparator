@@ -14,6 +14,40 @@ from .storage import (
 import inspect
 
 
+class Project:
+    modules: dict[str, Module]
+    _debug_db: Database
+
+    def __init__(self):
+        self.modules = {}
+        self._debug_db = None
+
+    def set_connection(self, connection_string: str, database_name: str):
+        self._debug_db = Database(database_name, DbConnection(connection_string))
+
+    def _get_debug_db(self):
+        return self._debug_db
+
+    def add_module(self, module: Module):
+        if module.name in self.modules:
+            raise Exception(f"duplicated module name '{module.name}'")
+        self.modules[module.name] = module
+        module.project = self
+
+    def get_module(self, info: str | ModuleType):
+        if isinstance(info, str):
+            name = info
+        else:
+            name = info.__name__.rsplit(".", 1)[-1]
+        if name not in self.modules:
+            raise Exception(f"module '{name}' is not defined")
+        return self.modules[name]
+
+    def add_modules(self, modules: list[Module]):
+        for item in modules:
+            self.add_module(item)
+
+
 class PortInfo:
     def __init__(
         self,
@@ -46,13 +80,15 @@ def _get_source_file_name():
 
 
 class Module:
+    project: Project
+
     def __init__(self, name: str = None):
         self.defined_in_file = _get_source_file_name()
         if name == None:
             name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
+        self.name = name
         self.processors = dict[str, Processor]()
-        self.db_con_str = ""
-        self.db_name = ""
+        self.project = None
 
     def add_processor(self, processor: Processor):
         if processor.name in self.processors:
@@ -64,7 +100,7 @@ class Module:
         for processor in processors:
             self.add_processor(processor)
 
-    def get_processor(self, info: str | Module):
+    def get_processor(self, info: str | ModuleType):
         name = ""
         if isinstance(info, str):
             name = info
@@ -161,11 +197,14 @@ class Processor:
 
 
 class Task:
+    _database: Database
+
     def __init__(self, processor: Processor):
         self.processor = processor
         self._inputBinding = dict[str, str | list[dict[str, Any]] | dict[str, Any]]()
         self._outputBinding = dict[str, str | str | list[dict[str, Any]]]()
         self._writers = dict[str, DbWriter | MemoryWriter]()
+        self._database = None
 
     # Config
 
@@ -255,11 +294,13 @@ class Task:
 
     # Exec
 
+    def set_connection(self, connection_string: str, database_name: str):
+        self._database = Database(connection_string, DbConnection(database_name))
+
     def _get_database(self):
-        return Database(
-            self.processor.module.db_name,
-            DbConnection(self.processor.module.db_con_str),
-        )
+        if self._database != None:
+            return self._database
+        return self.processor.module.project._get_debug_db()
 
     def get_named_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.processor.inputs:
