@@ -1,13 +1,10 @@
 import re
 import pandas as pd
-from df_prep import Module, Task
+from df_prep import Module, Task, Processor
 
 
-
-
-
-def create(module: Module):
-    processor = module.create_processor(
+def create():
+    processor = Processor(
         title="Сибирь. Очистка данных из платформы",
     )
     processor.add_default_input()
@@ -23,7 +20,9 @@ def create(module: Module):
             df = _transform_rs(df, equip_class)
             writer.write_many(df.to_dict("records"))
         writer.close()
+
     processor.set_action(action)
+    return processor
 
 
 def _clear_iri(text):

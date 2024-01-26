@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from df_prep import Module, Task
+from df_prep import Module, Task, Processor
 from run.processors.siber.utils.merge import merge_by_key_column
 from run.processors.siber.utils.match_common import configure_common_ports
 
@@ -9,8 +9,8 @@ from run.processors.siber.utils.match_common import configure_common_ports
 # from merge import merge_by_key_column
 
 
-def create(module: Module):
-    processor = module.create_processor(
+def create():
+    processor = Processor(
         title="Сибирь. Сопоставление РУ",
     )
 
@@ -45,6 +45,7 @@ def create(module: Module):
         save(df_duplicates, "duplicates")
 
     processor.set_action(action)
+    return processor
 
 
 def _match(df_rs, df_supa, df_substations_matched):
@@ -119,5 +120,3 @@ def _match(df_rs, df_supa, df_substations_matched):
     print("Сопоставлено", (df_res.shape[0]) / (df_rs.shape[0] + df_res.shape[0]), "RS")
 
     return df_res, df_supa, df_rs, df_duples
-
-  

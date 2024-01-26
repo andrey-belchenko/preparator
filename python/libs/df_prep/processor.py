@@ -1,6 +1,7 @@
 from __future__ import annotations
 import enum
 import os
+from types import ModuleType
 from typing import Any, Callable, TYPE_CHECKING
 from .storage import (
     Database,
@@ -34,7 +35,7 @@ def _default_action(params: Task):
 
 
 def _get_source_file_name():
-    caller_frame = inspect.stack()[3]
+    caller_frame = inspect.stack()[2]
     return (
         caller_frame.filename.replace(os.getcwd(), "")
         .replace("\\", "/")
@@ -43,18 +44,23 @@ def _get_source_file_name():
 
 
 class Module:
-    def __init__(self):
+    def __init__(self, name: str = None):
         self.defined_in_file = _get_source_file_name()
+        if name == None:
+            name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
         self.processors = dict[str, Processor]()
         self.db_con_str = ""
         self.db_name = ""
 
-    def create_processor(self, title=None, description=None):
-        processor = Processor(self, title, description)
+    def add_processor(self, processor: Processor):
         if processor.name in self.processors:
             raise Exception(f"duplicated processor name '{processor.name}'")
         self.processors[processor.name] = processor
-        return processor
+        processor.module = self
+
+    def add_processors(self, processors: list[Processor]):
+        for processor in processors:
+            self.add_processor(processor)
 
     def get_processor(self, info: str | Module):
         name = ""
@@ -66,20 +72,24 @@ class Module:
             raise Exception(f"processor '{name}' is not defined")
         return self.processors[name]
 
-    def create_task(self, processor_info: str | Module):
+    def create_task(self, processor_info: str | ModuleType):
         return self.get_processor(processor_info).create_task()
 
 
 class Processor:
-    def __init__(self, module: Module, title=None, description=None):
+    module: Module
+
+    def __init__(self, title: str = None, description: str = None, name: str = None):
         self.defined_in_file = _get_source_file_name()
-        self.name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
+        if name == None:
+            name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
+        self.name = name
         self.title = title
         self.description = description
         self.inputs = dict[str, PortInfo]()
         self.outputs = dict[str, PortInfo]()
         self.action = _default_action
-        self.module = module
+        self.module = None
 
     def add_named_input(
         self,
@@ -147,8 +157,8 @@ class Task:
         self._outputBinding = dict[str, str | str | list[dict[str, Any]]]()
         self._writers = dict[str, DbWriter | MemoryWriter]()
 
-    #Config
-        
+    # Config
+
     def _remove_input_binging(self, name: str):
         if name in self._inputBinding:
             del self._inputBinding[name]
@@ -199,12 +209,13 @@ class Task:
             print("- " + name + ": " + text)
 
     def _apply_default_binding(self):
-        def apply( ports: dict[str,PortInfo], bindings: dict):
+        def apply(ports: dict[str, PortInfo], bindings: dict):
             for name in ports:
                 if name not in bindings:
-                     port = ports[name]
-                     if port.default_binding!=None:
-                          bindings[name] =  port.default_binding
+                    port = ports[name]
+                    if port.default_binding != None:
+                        bindings[name] = port.default_binding
+
         apply(self.processor.inputs, self._inputBinding)
         apply(self.processor.outputs, self._outputBinding)
 
@@ -221,7 +232,7 @@ class Task:
         print("output binding")
         self._print_bindings(self.processor.outputs, self._outputBinding)
         print("")
-        task_context = self # TaskContext(self)
+        task_context = self  # TaskContext(self)
         self.processor.action(task_context)
         for name in task_context._writers:
             if not task_context._writers[name].is_closed():
@@ -279,5 +290,3 @@ class Task:
 #     def __init__(self, task: Task):
 #         self.task = task
 #         self._writers = dict[str, DbWriter | MemoryWriter]()
-
-    

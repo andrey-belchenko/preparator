@@ -6,11 +6,15 @@ from run.processors.siber import clear_rs_data, match_substation, match_voltage_
 
 def create_module():
     module = Module()
-    input_ya_disk_excel.create(module)
-    input_ya_disk_csv.create(module)
-    clear_rs_data.create(module)
-    match_substation.create(module)
-    match_voltage_level.create(module)
+    module.add_processors(
+        [
+            input_ya_disk_excel.create(),
+            input_ya_disk_csv.create(),
+            clear_rs_data.create(),
+            match_substation.create(),
+            match_voltage_level.create(),
+        ]
+    )
     return module
 
 

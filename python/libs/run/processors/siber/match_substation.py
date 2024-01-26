@@ -1,13 +1,12 @@
 import pandas as pd
 import re
-from df_prep import Module, Task
+from df_prep import Module, Task, Processor
 from run.processors.siber.utils.merge import merge_by_key_column
 from run.processors.siber.utils.match_common import configure_common_ports
 
 
-
-def create(module: Module):
-    processor = module.create_processor(
+def create():
+    processor = Processor(
         title="Сибирь. Сопоставление подстанций",
     )
 
@@ -42,10 +41,10 @@ def create(module: Module):
         save(df_duplicates, "duplicates")
 
     processor.set_action(action)
+    return processor
 
 
 def _match(df_rs, df_supa, df_old_matched):
-
     # import yaml
     # from data_io import load_data_from_db, insert_collection_into_db
     # from merge import merge_by_key_column
