@@ -18,9 +18,10 @@ class Project:
     modules: dict[str, Module]
     _debug_db: Database
 
-    def __init__(self):
+    def __init__(self, name):
         self.modules = {}
         self._debug_db = None
+        self.name = name
 
     def set_connection(self, connection_string: str, database_name: str):
         self._debug_db = Database(database_name, DbConnection(connection_string))

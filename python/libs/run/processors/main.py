@@ -28,6 +28,6 @@ def create_module_siber():
 
 
 def create_project():
-    project = Project()
+    project = Project("matching")
     project.add_modules([create_module_common(), create_module_siber()])
     return project
