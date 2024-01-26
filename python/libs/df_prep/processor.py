@@ -22,12 +22,14 @@ class PortInfo:
         description: str = None,
         default_binding: str = None,
         read_only: bool = False,
+        schema: Any = None,
     ):
         self.name = name
         self.title = title
         self.description = description
         self.default_binding = default_binding
         self.read_only = read_only
+        self.schema = schema
 
 
 def _default_action(params: Task):
@@ -100,32 +102,36 @@ class Processor:
         default_binding: str = None,
         read_only: bool = False,
     ):
-        item = PortInfo(name, title, description, default_binding, read_only)
+        item = PortInfo(name, title, description, default_binding, read_only, schema)
         if name in self.inputs:
             raise Exception(f"duplicated input name {name} in processor {self.name}")
         self.inputs[name] = item
-        self.schema = schema
 
     def add_named_output(
         self,
         name: str,
         title: str = None,
         description: str = None,
+        schema: dict[str, Any] = None,
         default_binding: str = None,
         read_only: bool = False,
     ):
-        item = PortInfo(name, title, description, default_binding, read_only)
+        item = PortInfo(name, title, description, default_binding, read_only, schema)
         if name in self.outputs:
             raise Exception(f"duplicated output name {name} in processor {self.name}")
         self.outputs[name] = item
 
-    def add_default_input(
+    def add_input(
         self,
         title: str = "Вход",
         description: str = None,
         schema: dict[str, Any] = None,
+        default_binding: str = None,
+        read_only: bool = False,
     ):
-        self.add_named_input("default", title, description, schema)
+        self.add_named_input(
+            "default", title, description, schema, default_binding, read_only
+        )
 
     def add_params_input(
         self,
@@ -135,13 +141,17 @@ class Processor:
     ):
         self.add_named_input("params", title, description, schema)
 
-    def add_default_output(
+    def add_output(
         self,
         title: str = "Выход",
         description: str = None,
         schema: dict[str, Any] = None,
+        default_binding: str = None,
+        read_only: bool = False,
     ):
-        self.add_named_output("default", title, description)
+        self.add_named_output(
+            "default", title, description, schema, default_binding, read_only
+        )
 
     def set_action(self, action: Callable[[str], None]):
         self.action = action

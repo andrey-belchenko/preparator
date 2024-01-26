@@ -7,8 +7,8 @@ def create():
     processor = Processor(
         title="Сибирь. Очистка данных из платформы",
     )
-    processor.add_default_input()
-    processor.add_default_output()
+    processor.add_input()
+    processor.add_output()
 
     def action(task: Task):
         items = list(task.get_reader().read_all())
