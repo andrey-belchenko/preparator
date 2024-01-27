@@ -74,10 +74,15 @@ def _default_action(params: Task):
 def _get_source_file_name():
     caller_frame = inspect.stack()[2]
     return (
-        caller_frame.filename.replace(os.getcwd(), "")
+        caller_frame.filename
+        # .replace(os.getcwd(), "")
         .replace("\\", "/")
-        .rstrip("/")[1:]
+        # .rstrip("/")[1:]
     )
+
+
+def _get_name_from_path(path):
+    return path.rsplit("/", 1)[-1].split(".", 1)[0]
 
 
 class Module:
@@ -86,7 +91,7 @@ class Module:
     def __init__(self, name: str = None):
         self.defined_in_file = _get_source_file_name()
         if name == None:
-            name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
+            name = _get_name_from_path(self.defined_in_file)
         self.name = name
         self.processors = dict[str, Processor]()
         self.project = None
@@ -121,7 +126,7 @@ class Processor:
     def __init__(self, title: str = None, description: str = None, name: str = None):
         self.defined_in_file = _get_source_file_name()
         if name == None:
-            name = self.defined_in_file.rsplit("/", 1)[-1].split(".", 1)[0]
+            name = _get_name_from_path(self.defined_in_file)
         self.name = name
         self.title = title
         self.description = description
