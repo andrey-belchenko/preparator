@@ -49,23 +49,25 @@ def _upload_project(
     db = client[mongo_database]
     coll_name = "sys_python_project"
     collection = db[coll_name]
-    fileID = upload_file(archive_path, db)
+    file_id = upload_file(archive_path, db)
     filter = {"project_name": project_name}
-    for doc in collection.find({"projectName": project_name}):
-        oldFileId = doc["fileId"]
-        delete_file(oldFileId, db)
+    for doc in collection.find(filter):
+        old_file_id = doc["file_id"]
     collection.delete_many(filter)
+    if old_file_id != None:
+        delete_file(old_file_id, db)
     update = {
         "$currentDate": {"changed_at": True},
         "$set": {
             "project_name": project_name,
-            "file_id": fileID,
+            "file_id": file_id,
             "changed_by": os.getlogin(),
             "version_info": version_info,
         },
     }
-    collection.update_one(filter, update, upsert=True)
+    result = collection.update_one(filter, update, upsert=True)
     print(f"Upload project: success")
+    print(f"- _id: {result.upserted_id}")
 
 
 def _add_version_info(tmp_path):
