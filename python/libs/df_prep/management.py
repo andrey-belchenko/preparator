@@ -2,7 +2,7 @@ import os
 import shutil
 from importlib.util import spec_from_file_location, module_from_spec
 import sys
-
+import git
 from df_prep import Project
 
 
@@ -12,7 +12,7 @@ def publish_project(
     main_func_name: str,
     include: list[str] = None,
 ):
-    build_project(root_path, main_file_path, main_func_name, include)
+    archive_path = build_project(root_path, main_file_path, main_func_name, include)
 
 
 def build_project(
@@ -22,8 +22,43 @@ def build_project(
     include: list[str] = None,
 ):
     tmp_path = _copy_files_to_temp_dir(root_path, include)
-    project = _run_in_temp_dir(tmp_path, main_file_path, main_func_name)
+    _add_git_info(tmp_path)
+    project = _run_main_function(tmp_path, main_file_path, main_func_name)
     archive_path = _make_archive(tmp_path, project.name)
+    return archive_path
+
+
+def get_project_git_info(path):
+    return _run_function(path, "git_info.py")
+
+
+def _add_git_info(tmp_path):
+    print("Add git info: start")
+    try:
+        repo = git.Repo(search_parent_directories=True)
+        git_info = {
+            "repository": repo.remotes.origin.url,
+            "branch": repo.active_branch.name,
+            "commit": repo.head.commit.hexsha,
+            "is_dirty": bool(repo.is_dirty()),
+        }
+    except git.exc.InvalidGitRepositoryError:
+        print("Add git info: git repository not found")  # todo не проверено
+        return None
+
+    py_pile_path = os.path.join(tmp_path, "git_info.py")
+
+    with open(py_pile_path, "w", encoding="utf-8") as f:
+        f.write(
+            f"""
+def main():
+    return {git_info}
+"""
+        )
+    if git_info != None:
+        git_info = get_project_git_info(tmp_path) # проверка 
+        print("Add git info: success")
+        print(git_info)
 
 
 def _make_archive(tmp_path, project_name):
@@ -69,15 +104,20 @@ def _copy_files_to_temp_dir(root_path, include: list[str] = None):
     return tmp_path
 
 
-def _run_in_temp_dir(tmp_path, main_file_path, main_func_name):
-    print("Build project: start")
-    sys.path.append(tmp_path)
-    main_file_path_full_path = os.path.join(tmp_path, main_file_path)
-    spec = spec_from_file_location("module", main_file_path_full_path)
+def _run_function(root_path, file_path, func_name="main"):
+    if root_path not in sys.path:
+        sys.path.append(root_path)
+    file_full_path = os.path.join(root_path, file_path)
+    spec = spec_from_file_location("module", file_full_path)
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
-    main_func = getattr(module, main_func_name)
-    project: Project = main_func()
+    func = getattr(module, func_name)
+    return func()
+
+
+def _run_main_function(tmp_path, main_file_path, main_func_name):
+    print("Build project: start")
+    project: Project = _run_function(tmp_path, main_file_path, main_func_name)
     if not isinstance(project, Project):
         raise Exception(
             f"Main function '{main_func_name}' should return instance of 'df_prep.Project' class"
