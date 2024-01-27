@@ -4,15 +4,24 @@ from importlib.util import spec_from_file_location, module_from_spec
 import sys
 import git
 from df_prep import Project
+import pymongo
+import gridfs
+
+from df_prep.mongo.files import delete_file, upload_file
 
 
 def publish_project(
+    mongo_uri: str,
+    mongo_database: str,
     root_path: str,
     main_file_path: str,
     main_func_name: str,
     include: list[str] = None,
 ):
-    archive_path = build_project(root_path, main_file_path, main_func_name, include)
+    archive_path, project_name, version_info = build_project(
+        root_path, main_file_path, main_func_name, include
+    )
+    _upload_project(mongo_uri, mongo_database, archive_path, project_name, version_info)
 
 
 def build_project(
@@ -22,43 +31,71 @@ def build_project(
     include: list[str] = None,
 ):
     tmp_path = _copy_files_to_temp_dir(root_path, include)
-    _add_git_info(tmp_path)
+    version_info = _add_version_info(tmp_path)
     project = _run_main_function(tmp_path, main_file_path, main_func_name)
     archive_path = _make_archive(tmp_path, project.name)
-    return archive_path
+    return archive_path, project.name, version_info
 
 
-def get_project_git_info(path):
-    return _run_function(path, "git_info.py")
+def get_project_version_info(path):
+    return _run_function(path, "version_info.py")
 
 
-def _add_git_info(tmp_path):
-    print("Add git info: start")
+def _upload_project(
+    mongo_uri, mongo_database, archive_path, project_name, version_info
+):
+    print(f"Upload project: start")
+    client = pymongo.MongoClient(mongo_uri)
+    db = client[mongo_database]
+    coll_name = "sys_python_project"
+    collection = db[coll_name]
+    fileID = upload_file(archive_path, db)
+    filter = {"project_name": project_name}
+    for doc in collection.find({"projectName": project_name}):
+        oldFileId = doc["fileId"]
+        delete_file(oldFileId, db)
+    collection.delete_many(filter)
+    update = {
+        "$currentDate": {"changed_at": True},
+        "$set": {
+            "project_name": project_name,
+            "file_id": fileID,
+            "changed_by": os.getlogin(),
+            "version_info": version_info,
+        },
+    }
+    collection.update_one(filter, update, upsert=True)
+    print(f"Upload project: success")
+
+
+def _add_version_info(tmp_path):
+    print("Add version info: start")
     try:
         repo = git.Repo(search_parent_directories=True)
-        git_info = {
+        version_info = {
             "repository": repo.remotes.origin.url,
             "branch": repo.active_branch.name,
             "commit": repo.head.commit.hexsha,
             "is_dirty": bool(repo.is_dirty()),
         }
     except git.exc.InvalidGitRepositoryError:
-        print("Add git info: git repository not found")  # todo не проверено
+        print("Add version info: git repository not found")  # todo не проверено
         return None
 
-    py_pile_path = os.path.join(tmp_path, "git_info.py")
+    py_pile_path = os.path.join(tmp_path, "version_info.py")
 
     with open(py_pile_path, "w", encoding="utf-8") as f:
         f.write(
             f"""
 def main():
-    return {git_info}
+    return {version_info}
 """
         )
-    if git_info != None:
-        git_info = get_project_git_info(tmp_path) # проверка 
-        print("Add git info: success")
-        print(git_info)
+    if version_info != None:
+        version_info = get_project_version_info(tmp_path)  # проверка
+        print("Add version info: success")
+        print(version_info)
+    return version_info
 
 
 def _make_archive(tmp_path, project_name):
