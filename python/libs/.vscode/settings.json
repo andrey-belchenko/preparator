@@ -2,7 +2,7 @@
   "cSpell.language": "en,ru",
   "omnisharp.projectFilesExcludePattern": "**/node_modules/**,**/.git/**,**/bower_components/**",
   "files.exclude": {
-    "**/_pycache__": true,
-    "**/_init__.py": true
+    "**/__pycache__": true,
+    "**/__init__.py": true
   }
 }

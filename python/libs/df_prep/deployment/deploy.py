@@ -13,7 +13,6 @@ from df_prep.processor import PortInfo
 from df_prep.deployment.common import _coll_prefix
 
 
-
 def _dict_from_obj(obj):
     dict = {}
     for name in dir(obj):
@@ -22,6 +21,24 @@ def _dict_from_obj(obj):
             if isinstance(val, (str, bool)):
                 dict[name] = val
     return dict
+
+
+def _remove_deployment(mongo_uri, mongo_database, project_name):
+    print(f"Remove deployment: start")
+    client = pymongo.MongoClient(mongo_uri)
+    db = client[mongo_database]
+    collection = db[f"{_coll_prefix}project"]
+    filter = {"name": project_name}
+    for doc in collection.find(filter):
+        old_file_id = doc["file_id"]
+        delete_file(old_file_id, db)
+
+    collection.delete_many(filter)
+    filter = {"project": project_name}
+    db[f"{_coll_prefix}module"].delete_many(filter)
+    db[f"{_coll_prefix}processor"].delete_many(filter)
+    print(f"Remove deployment: success")
+
 
 
 
@@ -53,7 +70,7 @@ def _upload_project(
             "version_info": version_info,
             "main_file_path": main_file_path,
             "main_func_name": main_func_name,
-            "deployment_id": str(uuid.uuid4())
+            "deployment_id": str(uuid.uuid4()),
         }
     )
     upsert_one_with_timestamp(

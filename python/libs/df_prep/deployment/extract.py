@@ -8,7 +8,7 @@ from df_prep.mongo.files import read_file_data
 
 
 
-def _download_project(db: Database, project_name: str, folder_path: str):
+def download_project(db: Database, project_name: str, folder_path: str):
     print(f"Download project: start")
     print(f"- project_name: {project_name}")
     collection = db[f"{_coll_prefix}project"]
@@ -19,14 +19,6 @@ def _download_project(db: Database, project_name: str, folder_path: str):
     if os.path.isdir(folder_path):
         shutil.rmtree(folder_path)
     os.makedirs(folder_path, exist_ok=True)
-
-
-    # # Open the zip file in memory
-    # with zipfile.ZipFile(data) as zip_ref:
-    #     # Unpack the zip file to a specific directory
-    #     shutil.unpack_archive(zip_ref, folder_path)
-
-    # # Open the zip file in memory
     with zipfile.ZipFile(data, 'r') as zip_ref:
         zip_ref.extractall(folder_path)
     print(f"Download project: success")
