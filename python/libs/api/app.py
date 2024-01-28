@@ -44,11 +44,15 @@ async def get_processors(db_name: str = Query(...)) -> list[ProcessorInfo]:
     return mongo[db_name][processor_coll_name].find({})
 
 
-@app.get("/processors/{name}")
+@app.get("/modules/{module_name}/processors/{processor_name}")
 async def get_processor(
-    name: str = Path(...), db_name: str = Query(...)
+    module_name: str = Path(...),
+    processor_name: str = Path(...),
+    db_name: str = Query(...),
 ) -> ProcessorInfo:
-    item = mongo[db_name][processor_coll_name].find_one({"name": name})
+    item = mongo[db_name][processor_coll_name].find_one(
+        {"module": module_name, "name": processor_name}
+    )
     if item is None:
         raise HTTPException(status_code=404)
     return item
