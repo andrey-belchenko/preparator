@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException, Path, Query, Body
 from pymongo import MongoClient
 from pyparsing import Any
@@ -13,19 +12,19 @@ project_coll_name = f"{collection_prefix}project"
 module_coll_name = f"{collection_prefix}module"
 processor_coll_name = f"{collection_prefix}processor"
 
+
 @app.get("/projects")
 async def get_projects(db_name: str = Query(...)) -> list[ProjectInfo]:
     return mongo[db_name][project_coll_name].find({})
 
 
 @app.get("/projects/{name}")
-async def get_project(
-    name: str = Path(...), db_name: str = Query(...)
-) -> ProjectInfo:
+async def get_project(name: str = Path(...), db_name: str = Query(...)) -> ProjectInfo:
     item = mongo[db_name][project_coll_name].find_one({"name": name})
     if item is None:
         raise HTTPException(status_code=404)
     return item
+
 
 @app.get("/modules")
 async def get_modules(db_name: str = Query(...)) -> list[ModuleInfo]:
@@ -33,19 +32,16 @@ async def get_modules(db_name: str = Query(...)) -> list[ModuleInfo]:
 
 
 @app.get("/modules/{name}")
-async def get_module(
-    name: str = Path(...), db_name: str = Query(...)
-) -> ModuleInfo:
+async def get_module(name: str = Path(...), db_name: str = Query(...)) -> ModuleInfo:
     item = mongo[db_name][module_coll_name].find_one({"name": name})
     if item is None:
         raise HTTPException(status_code=404)
     return item
 
 
-
 @app.get("/processors")
 async def get_processors(db_name: str = Query(...)) -> list[ProcessorInfo]:
-    return [mongo[db_name][processor_coll_name].find_one({})]
+    return mongo[db_name][processor_coll_name].find({})
 
 
 @app.get("/processors/{name}")

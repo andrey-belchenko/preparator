@@ -33,6 +33,7 @@ class ProcessorInfo(BaseModel):
         title: Optional[str] = None
         description: Optional[str] = None
         schema: Optional[Any] = None
+        default_binding: Optional[str] = None
 
     name: str
     project: str
