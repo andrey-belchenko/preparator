@@ -4,7 +4,7 @@ from pymongo.collection import Collection
 from typing import Any
 
 
-class DbConnection:
+class ConnectionInfo:
     def __init__(self, connectionString):
         self.connectionString = connectionString
         # if self.connectionString == None:
@@ -18,8 +18,8 @@ class DbConnection:
         return self._instance
 
 
-class Database:
-    def __init__(self, name: str, connection: DbConnection):
+class DatabaseInfo:
+    def __init__(self, name: str, connection: ConnectionInfo):
         self.name = name
         self.connection = connection
         # if self.name == None:
@@ -35,8 +35,8 @@ class Database:
         return self._instance
 
 
-class DbCollection:
-    def __init__(self, collectionName: str, database: Database):
+class CollectionInfo:
+    def __init__(self, collectionName: str, database: DatabaseInfo):
         self.name = collectionName
         self.database = database
         # if self.database == None:
@@ -52,8 +52,8 @@ class DbCollection:
         return self._instance
 
 
-class DbReader(DbCollection):
-    def __init__(self, collectionName: str, database: Database = None):
+class DbReader(CollectionInfo):
+    def __init__(self, collectionName: str, database: DatabaseInfo = None):
         super().__init__(collectionName, database)
 
     def read_all(self):
@@ -83,8 +83,8 @@ class MemoryReader:
         return self._data[0]
 
 
-class DbWriter(DbCollection):
-    def __init__(self, collectionName: str, database: Database = None):
+class DbWriter(CollectionInfo):
+    def __init__(self, collectionName: str, database: DatabaseInfo = None):
         super().__init__(collectionName, database)
         self._count = 0
         self._closed = True

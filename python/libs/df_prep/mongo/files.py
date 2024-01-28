@@ -1,4 +1,7 @@
+import io
 import gridfs
+
+
 def upload_file(path, db):
     fs = gridfs.GridFS(db)
     print(f"Upload file '{path}': start")
@@ -13,6 +16,12 @@ def delete_file(file_id, db):
     print(f"Remove file '{file_id}': start")
     fs.delete(file_id)
     print(f"Remove file '{file_id}': success")
+
+
+def read_file_data(file_id, db):
+    fs = gridfs.GridFS(db)
+    grid_out = fs.get(file_id)
+    return grid_out.read()
 
 
 # def downloadFile(fileId, fileName, db=None):

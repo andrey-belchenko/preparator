@@ -4,8 +4,8 @@ import os
 from types import ModuleType
 from typing import Any, Callable, TYPE_CHECKING
 from .storage import (
-    Database,
-    DbConnection,
+    DatabaseInfo,
+    ConnectionInfo,
     DbReader,
     DbWriter,
     MemoryReader,
@@ -16,7 +16,7 @@ import inspect
 
 class Project:
     modules: dict[str, Module]
-    _debug_db: Database
+    _debug_db: DatabaseInfo
 
     def __init__(self, name):
         self.modules = {}
@@ -24,7 +24,7 @@ class Project:
         self.name = name
 
     def set_connection(self, connection_string: str, database_name: str):
-        self._debug_db = Database(database_name, DbConnection(connection_string))
+        self._debug_db = DatabaseInfo(database_name, ConnectionInfo(connection_string))
 
     def _get_debug_db(self):
         return self._debug_db
@@ -203,7 +203,7 @@ class Processor:
 
 
 class Task:
-    _database: Database
+    _database: DatabaseInfo
 
     def __init__(self, processor: Processor):
         self.processor = processor
@@ -301,7 +301,7 @@ class Task:
     # Exec
 
     def set_connection(self, connection_string: str, database_name: str):
-        self._database = Database(connection_string, DbConnection(database_name))
+        self._database = DatabaseInfo(connection_string, ConnectionInfo(database_name))
 
     def _get_database(self):
         if self._database != None:
