@@ -9,7 +9,7 @@ import pymongo
 from pymongo.database import Database
 from df_prep.mongo.commands import upsert_one_with_timestamp
 from df_prep.mongo.files import delete_file, upload_file
-from df_prep.processor import PortInfo
+from df_prep.processor import Port
 from df_prep.deployment.common import _coll_prefix
 
 
@@ -124,7 +124,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
             )
             _normalize_def_in_file(info, temp_path)
 
-            def make_port_info(ports: dict[str, PortInfo]):
+            def make_port_info(ports: dict[str, Port]):
                 ports_info = []
                 for port in ports.values():
                     port_info = _dict_from_obj(port)

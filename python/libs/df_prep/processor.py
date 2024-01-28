@@ -49,7 +49,7 @@ class Project:
             self.add_module(item)
 
 
-class PortInfo:
+class Port:
     def __init__(
         self,
         name: str,
@@ -130,8 +130,8 @@ class Processor:
         self.name = name
         self.title = title
         self.description = description
-        self.inputs = dict[str, PortInfo]()
-        self.outputs = dict[str, PortInfo]()
+        self.inputs = dict[str, Port]()
+        self.outputs = dict[str, Port]()
         self.action = _default_action
         self.module = None
 
@@ -144,7 +144,7 @@ class Processor:
         default_binding: str = None,
         read_only: bool = False,
     ):
-        item = PortInfo(name, title, description, default_binding, read_only, schema)
+        item = Port(name, title, description, default_binding, read_only, schema)
         if name in self.inputs:
             raise Exception(f"duplicated input name {name} in processor {self.name}")
         self.inputs[name] = item
@@ -158,7 +158,7 @@ class Processor:
         default_binding: str = None,
         read_only: bool = False,
     ):
-        item = PortInfo(name, title, description, default_binding, read_only, schema)
+        item = Port(name, title, description, default_binding, read_only, schema)
         if name in self.outputs:
             raise Exception(f"duplicated output name {name} in processor {self.name}")
         self.outputs[name] = item
@@ -264,7 +264,7 @@ class Task:
             print("- " + name + ": " + text)
 
     def _apply_default_binding(self):
-        def apply(ports: dict[str, PortInfo], bindings: dict):
+        def apply(ports: dict[str, Port], bindings: dict):
             for name in ports:
                 if name not in bindings:
                     port = ports[name]
