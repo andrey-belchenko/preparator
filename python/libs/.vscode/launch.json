@@ -36,6 +36,17 @@
                 "--no-debugger"
             ],
             "jinja": true
+        },
+        {
+            "name": "Python: FastAPI",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "api.app:app",
+                "--reload"
+            ],
+            "justMyCode": false
         }
     ]
 }
