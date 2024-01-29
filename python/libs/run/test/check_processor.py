@@ -25,11 +25,11 @@ def load_supa_data(file_name, collection_name):
     task.run()
 
 
-def load_rs_data(file_name, collection_name, selectFields, addFields=None):
+def load_rs_data(file_name, collection_name, select_fields, add_fields=None):
     task = common_module.create_task(input_ya_disk_csv)
     params = ya_disk_params.copy()
-    params["selectFields"] = selectFields
-    params["addFields"] = addFields
+    params["select_fields"] = select_fields
+    params["add_fields"] = add_fields
     params["file_path"] = file_name
     task.bind_params(params)
     data = []

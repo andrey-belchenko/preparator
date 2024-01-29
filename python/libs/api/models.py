@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Any, Optional
+import enum
+from typing import Any, List, Optional, Union
 from pydantic import BaseModel
 
 
@@ -32,7 +33,7 @@ class ProcessorInfo(BaseModel):
         read_only: bool
         title: Optional[str] = None
         description: Optional[str] = None
-        schema: Optional[Any] = None
+        data_schema: Optional[Any] = None
         default_binding: Optional[str] = None
 
     name: str
@@ -43,3 +44,27 @@ class ProcessorInfo(BaseModel):
     description: Optional[str] = None
     inputs: list[PortInfo]
     outputs: list[PortInfo]
+
+
+class TaskRequest(BaseModel):
+    class Binding(BaseModel):
+        name: str
+        value: Union[str, List[Any], Any]
+
+    is_async: bool
+    working_db_name: str
+    input_bindings: list[Binding]
+    output_bindings: list[Binding]
+
+
+class TaskInfo(BaseModel):
+    class TaskStatus(enum.Enum):
+        RUNNING = "RUNNING"
+        SUCCEEDED = "SUCCEEDED"
+        FAILED = "FAILED"
+
+    module: str
+    processor: str
+    id: str
+    status: TaskStatus
+    task_request: TaskRequest

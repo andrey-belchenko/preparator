@@ -26,12 +26,12 @@ def configure(processor: Processor, get_data_frame_func):
                 "secret": True,
                 "required": True,
             },
-            "selectFields": {
+            "select_fields": {
                 "title": "Выбрать и переименовать поля для загрузки",
                 "description": r'Формат JSON {"Целевое поле":"Поле в файле",...}',
                 "additionalProperties": {"type": "string"},
             },
-            "addFields": {
+            "add_fields": {
                 "title": "Добавить поля",
                 "description": r'Формат JSON {"Целевое поле":"Константа",...}',
                 "additionalProperties": {"type": "string"},

@@ -1,0 +1,337 @@
+{
+	"info": {
+		"_postman_id": "750bcdb5-f30c-4e2b-ba73-39a91fc793f2",
+		"name": "Python API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7024385"
+	},
+	"item": [
+		{
+			"name": "projects",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/projects?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "projects/{name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/projects/siber?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"projects",
+						"siber"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/modules?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"modules"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/modules/common?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"modules",
+						"common"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "processors",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/processors?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"processors"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{module_name}/processors/{processor_name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/modules/common/processors/input_ya_disk_excel?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"modules",
+						"common",
+						"processors",
+						"input_ya_disk_excel"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{module_name}/processors/{processor_name} Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"is_async\": true,\r\n  \"working_db_name\": \"string\",\r\n  \"input_bindings\": [\r\n    {\r\n      \"name\": \"string\",\r\n      \"value\": \"string\"\r\n    }\r\n  ],\r\n  \"output_bindings\": [\r\n    {\r\n      \"name\": \"string\",\r\n      \"value\": \"string\"\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/modules/common/processors/input_ya_disk_excel/tasks?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"modules",
+						"common",
+						"processors",
+						"input_ya_disk_excel",
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tasks/{id}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/tasks/9a1b485d-bae2-42d6-9ae3-c85d0bcee009?db_name=bav_test2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"tasks",
+						"9a1b485d-bae2-42d6-9ae3-c85d0bcee009"
+					],
+					"query": [
+						{
+							"key": "db_name",
+							"value": "bav_test2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

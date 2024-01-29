@@ -129,7 +129,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
                 for port in ports.values():
                     port_info = _dict_from_obj(port)
                     ports_info.append(port_info)
-                    port_info["schema"] = port.schema
+                    port_info["data_schema"] = port.schema
                 return ports_info
 
             info["inputs"] = make_port_info(processor.inputs)
