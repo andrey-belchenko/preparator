@@ -87,7 +87,7 @@ async def run_task(
 
 
 @app.get("/tasks/{id}")
-async def run_task(
+async def get_task(
     id: str = Path(...),
     db_name: str = Query(...),
 ) -> TaskInfo:
