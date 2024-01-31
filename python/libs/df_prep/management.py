@@ -1,3 +1,4 @@
+import logging
 import pymongo
 from df_prep.deployment import extract
 from df_prep.deployment import common
@@ -5,11 +6,18 @@ from df_prep.deployment.deploy import (
     _copy_files_to_temp_dir,
     _make_archive,
     _remove_deployment,
-    _run_main_function,
+    run_main_function,
     _upload_project,
 )
 from pymongo.database import Database
 
+
+
+def _configure_logging():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    logger.addHandler(console_handler)
 
 def set_connection(mongo_uri: str):
     common._mongo_uri = mongo_uri
@@ -25,6 +33,7 @@ def deploy_project(
     main_func_name: str,
     include: list[str] = None,
 ):
+    _configure_logging()
     archive_path, project, temp_path = build_project(
         root_path, main_file_path, main_func_name, include
     )
@@ -43,8 +52,9 @@ def build_project(
     main_func_name: str,
     include: list[str] = None,
 ):
+    _configure_logging()
     temp_path = _copy_files_to_temp_dir(root_path, include)
-    project = _run_main_function(temp_path, main_file_path, main_func_name)
+    project = run_main_function(temp_path, main_file_path, main_func_name)
     archive_path = _make_archive(temp_path, project.name)
     return archive_path, project, temp_path
 

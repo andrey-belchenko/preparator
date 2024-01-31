@@ -1,7 +1,9 @@
+import logging
 import uuid
 from fastapi import FastAPI, HTTPException, Path, Query, Body
 from pyparsing import Any
 from api.mongo import get_sys_db
+from api import mongo
 from api import processing
 from api.models import (
     ProjectInfo,
@@ -12,7 +14,10 @@ from api.models import (
 )
 
 app = FastAPI(port=8000)
-
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+root_logger.addHandler(console_handler)
 
 collection_prefix = "sys_python_"
 project_coll_name = f"{collection_prefix}project"
@@ -29,9 +34,7 @@ async def get_projects(workspace: str = Query(...)) -> list[ProjectInfo]:
 async def get_project(
     name: str = Path(...), workspace: str = Query(...)
 ) -> ProjectInfo:
-    item = get_sys_db()[project_coll_name].find_one(
-        {"workspace": workspace, "name": name}
-    )
+    item = mongo.get_project(workspace, name)
     if item is None:
         raise HTTPException(status_code=404)
     return item
@@ -44,9 +47,7 @@ async def get_modules(workspace: str = Query(...)) -> list[ModuleInfo]:
 
 @app.get("/modules/{name}")
 async def get_module(name: str = Path(...), workspace: str = Query(...)) -> ModuleInfo:
-    item = get_sys_db()[module_coll_name].find_one(
-        {"workspace": workspace, "name": name}
-    )
+    item = mongo.get_module(workspace, name)
     if item is None:
         raise HTTPException(status_code=404)
     return item
@@ -82,11 +83,13 @@ async def run_task(
     processor_name: str = Path(...),
     workspace: str = Query(...),
 ) -> TaskInfo:
-    module_info = get_sys_db()[module_coll_name].find_one(
-        {"workspace": workspace, "name": module_name}
-    )
-
-    processing.run_task(
+    module_info = mongo.get_module(workspace, module_name)
+    if module_info is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"module '{module_name}' is not found in workspace '{workspace}'",
+        )
+    await processing.run_task(
         workspace,
         module_info["project"],
         module_name,

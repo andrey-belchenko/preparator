@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from importlib.util import spec_from_file_location, module_from_spec
@@ -12,7 +13,7 @@ from df_prep.mongo.files import delete_file, upload_file
 from df_prep.processor import Port
 from df_prep.deployment.common import _coll_prefix
 from df_prep.deployment import common
-
+_logger = logging.getLogger(__name__)
 
 def _dict_from_obj(obj):
     dict = {}
@@ -25,7 +26,7 @@ def _dict_from_obj(obj):
 
 
 def _remove_deployment(project_name):
-    print(f"Remove deployment: start")
+    _logger.info(f"Remove deployment: start")
     client = pymongo.MongoClient(common._mongo_uri)
     db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
@@ -44,7 +45,7 @@ def _remove_deployment(project_name):
     }
     db[f"{_coll_prefix}module"].delete_many(filter)
     db[f"{_coll_prefix}processor"].delete_many(filter)
-    print(f"Remove deployment: success")
+    _logger.info(f"Remove deployment: success")
 
 
 def _upload_project(
@@ -55,7 +56,7 @@ def _upload_project(
     temp_path,
 ):
     version_info = _get_version_info()
-    print(f"Upload project: start")
+    _logger.info(f"Upload project: start")
     client = pymongo.MongoClient(common._mongo_uri)
     db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
@@ -88,8 +89,8 @@ def _upload_project(
     _update_modules_info(db, project, temp_path)
     _update_processors_info(db, project, temp_path)
     client.close()
-    print(f"Upload project: success")
-    print(f"- {fields}")
+    _logger.info(f"Upload project: success")
+    _logger.info(f"- {fields}")
 
 
 def _normalize_def_in_file(info: dict, root_path):
@@ -162,7 +163,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
 
 
 def _get_version_info():
-    print("Get version info: start")
+    _logger.info("Get version info: start")
     try:
         repo = git.Repo(search_parent_directories=True)
         version_info = {
@@ -172,16 +173,16 @@ def _get_version_info():
             "is_dirty": bool(repo.is_dirty()),
         }
     except git.exc.InvalidGitRepositoryError:
-        print("Get version info: git repository not found")  # todo не проверено
+        _logger.info("Get version info: git repository not found")  # todo не проверено
         return None
     if version_info != None:
-        print("Get version info: success")
-        print(version_info)
+        _logger.info("Get version info: success")
+        _logger.info(version_info)
     return version_info
 
 
 def _make_archive(temp_path, project_name):
-    print("Make archive: start")
+    _logger.info("Make archive: start")
     archive_path = os.path.join(
         os.path.dirname(temp_path), "df_prep_projects", f"{project_name}"
     )
@@ -194,13 +195,13 @@ def _make_archive(temp_path, project_name):
                 shutil.rmtree(os.path.join(dirpath, dirname))
     shutil.make_archive(archive_path, "zip", temp_path)
     shutil.rmtree(temp_path)
-    print("Make archive: success")
-    print(f"- temp dir path: {archive_path_ext}")
+    _logger.info("Make archive: success")
+    _logger.info(f"- temp dir path: {archive_path_ext}")
     return archive_path_ext
 
 
 def _copy_files_to_temp_dir(root_path, include: list[str] = None):
-    print("Collect source files: start")
+    _logger.info("Collect source files: start")
     temp_path = os.path.join(root_path, "build", "df_prep_temp")
 
     if os.path.isdir(temp_path):
@@ -222,8 +223,8 @@ def _copy_files_to_temp_dir(root_path, include: list[str] = None):
         else:
             os.makedirs(os.path.dirname(trg_path))
             shutil.copy(src_path, trg_path)
-    print("Collect source files: success")
-    print(f"- temp dir path: {temp_path}")
+    _logger.info("Collect source files: success")
+    _logger.info(f"- temp dir path: {temp_path}")
     return temp_path
 
 
@@ -238,18 +239,18 @@ def _run_function(root_path, file_path, func_name="main"):
     return func()
 
 
-def _run_main_function(tmp_path, main_file_path, main_func_name):
-    print("Build project: start")
+def run_main_function(tmp_path, main_file_path, main_func_name):
+    _logger.info("Build project: start")
     project: Project = _run_function(tmp_path, main_file_path, main_func_name)
     if not isinstance(project, Project):
         raise Exception(
             f"Main function '{main_func_name}' should return instance of 'df_prep.Project' class"
         )
-    print("Build project: success")
-    print(f"- project: {project.name}")
+    _logger.info("Build project: success")
+    _logger.info(f"- project: {project.name}")
     for module_name in project.modules:
         module = project.modules[module_name]
-        print(f"- - module: {module.name}")
+        _logger.info(f"- - module: {module.name}")
         for proc_name in module.processors:
-            print(f"- - - processor: {proc_name}")
+            _logger.info(f"- - - processor: {proc_name}")
     return project
