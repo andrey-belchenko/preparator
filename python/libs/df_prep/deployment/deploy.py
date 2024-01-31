@@ -29,13 +29,19 @@ def _remove_deployment(project_name):
     client = pymongo.MongoClient(common._mongo_uri)
     db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
-    filter = {"name": project_name}
+    filter = {
+        "name": project_name,
+        "workspace": common._workspace_name,
+    }
     for doc in collection.find(filter):
         old_file_id = doc["file_id"]
         delete_file(old_file_id, db)
 
     collection.delete_many(filter)
-    filter = {"project": project_name}
+    filter = {
+        "project": project_name,
+        "workspace": common._workspace_name,
+    }
     db[f"{_coll_prefix}module"].delete_many(filter)
     db[f"{_coll_prefix}processor"].delete_many(filter)
     print(f"Remove deployment: success")
@@ -54,7 +60,10 @@ def _upload_project(
     db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
     file_id = upload_file(archive_path, db)
-    filter = {"name": project.name}
+    filter = {
+        "name": project.name,
+        "workspace": common._workspace_name,
+    }
     for doc in collection.find(filter):
         old_file_id = doc["file_id"]
         delete_file(old_file_id, db)
@@ -62,6 +71,7 @@ def _upload_project(
     fields = _dict_from_obj(project)
     fields.update(
         {
+            "workspace": common._workspace_name,
             "file_id": file_id,
             "published_by": os.getlogin(),
             "version_info": version_info,
@@ -97,13 +107,19 @@ def _update_modules_info(db: Database, project: Project, temp_path: str):
         info = _dict_from_obj(module)
         info.update(
             {
+                "workspace": common._workspace_name,
                 "project": project.name,
             }
         )
         _normalize_def_in_file(info, temp_path)
         info_list.append(info)
 
-    collection.delete_many({"project": project.name})
+    collection.delete_many(
+        {
+            "project": project.name,
+            "workspace": common._workspace_name,
+        }
+    )
     collection.insert_many(info_list)
 
 
@@ -115,6 +131,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
             info = _dict_from_obj(processor)
             info.update(
                 {
+                    "workspace": common._workspace_name,
                     "project": project.name,
                     "module": module.name,
                 }
@@ -135,7 +152,12 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
             # info["temp_path"] = temp_path
             info_list.append(info)
 
-    collection.delete_many({"project": project.name})
+    collection.delete_many(
+        {
+            "project": project.name,
+            "workspace": common._workspace_name,
+        }
+    )
     collection.insert_many(info_list)
 
 

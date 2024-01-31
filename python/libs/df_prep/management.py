@@ -15,6 +15,10 @@ def set_connection(mongo_uri: str):
     common._mongo_uri = mongo_uri
 
 
+def set_workspace(workspace_name: str):
+    common._workspace_name = workspace_name
+
+
 def deploy_project(
     root_path: str,
     main_file_path: str,
@@ -47,7 +51,7 @@ def build_project(
 
 def download_project(project_name: str, folder_path: str):
     db = pymongo.MongoClient(common._mongo_uri)[common._sys_db_name]
-    extract.download_project(db, project_name, folder_path)
+    extract.download_project(common._workspace_name, db, project_name, folder_path)
 
 
 def remove_deployment(mongo_uri, project_name, sys_db_name=common._sys_db_name):

@@ -2,6 +2,7 @@ from df_prep import management
 
 
 management.set_connection("mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017")
+management.set_workspace("bav_test4")
 
 management.deploy_project(
     root_path=r"C:\Repos\mygithub\preparator\python\libs",

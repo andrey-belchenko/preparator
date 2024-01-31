@@ -1,7 +1,8 @@
 import uuid
 from fastapi import FastAPI, HTTPException, Path, Query, Body
 from pyparsing import Any
-from mongo import mongo
+from api.mongo import get_sys_db
+from api import processing
 from api.models import (
     ProjectInfo,
     ModuleInfo,
@@ -20,44 +21,50 @@ processor_coll_name = f"{collection_prefix}processor"
 
 
 @app.get("/projects")
-async def get_projects(db_name: str = Query(...)) -> list[ProjectInfo]:
-    return mongo[db_name][project_coll_name].find({})
+async def get_projects(workspace: str = Query(...)) -> list[ProjectInfo]:
+    return get_sys_db()[project_coll_name].find({"workspace": workspace})
 
 
 @app.get("/projects/{name}")
-async def get_project(name: str = Path(...), db_name: str = Query(...)) -> ProjectInfo:
-    item = mongo[db_name][project_coll_name].find_one({"name": name})
+async def get_project(
+    name: str = Path(...), workspace: str = Query(...)
+) -> ProjectInfo:
+    item = get_sys_db()[project_coll_name].find_one(
+        {"workspace": workspace, "name": name}
+    )
     if item is None:
         raise HTTPException(status_code=404)
     return item
 
 
 @app.get("/modules")
-async def get_modules(db_name: str = Query(...)) -> list[ModuleInfo]:
-    return mongo[db_name][module_coll_name].find({})
+async def get_modules(workspace: str = Query(...)) -> list[ModuleInfo]:
+    return get_sys_db()[module_coll_name].find({"workspace": workspace})
 
 
 @app.get("/modules/{name}")
-async def get_module(name: str = Path(...), db_name: str = Query(...)) -> ModuleInfo:
-    item = mongo[db_name][module_coll_name].find_one({"name": name})
+async def get_module(name: str = Path(...), workspace: str = Query(...)) -> ModuleInfo:
+    item = get_sys_db()[module_coll_name].find_one(
+        {"workspace": workspace, "name": name}
+    )
     if item is None:
         raise HTTPException(status_code=404)
     return item
 
 
 @app.get("/processors")
-async def get_processors(db_name: str = Query(...)) -> list[ProcessorInfo]:
-    return mongo[db_name][processor_coll_name].find({})
+async def get_processors(workspace: str = Query(...)) -> list[ProcessorInfo]:
+    return get_sys_db()[processor_coll_name].find({"workspace": workspace})
 
 
 @app.get("/modules/{module_name}/processors/{processor_name}")
 async def get_processor(
     module_name: str = Path(...),
     processor_name: str = Path(...),
-    db_name: str = Query(...),
+    workspace: str = Query(...),
 ) -> ProcessorInfo:
-    item = mongo[db_name][processor_coll_name].find_one(
-        {"module": module_name, "name": processor_name}
+    item = get_sys_db()[processor_coll_name].find_one(
+        {"workspace": workspace, "module": module_name, "name": processor_name}
     )
     if item is None:
         raise HTTPException(status_code=404)
@@ -73,8 +80,21 @@ async def run_task(
     task_request: TaskRequest,
     module_name: str = Path(...),
     processor_name: str = Path(...),
-    db_name: str = Query(...),
+    workspace: str = Query(...),
 ) -> TaskInfo:
+    module_info = get_sys_db()[module_coll_name].find_one(
+        {"workspace": workspace, "name": module_name}
+    )
+
+    processing.run_task(
+        workspace,
+        module_info["project"],
+        module_name,
+        processor_name,
+        task_request.input_bindings,
+        task_request.output_bindings,
+        task_request.is_async,
+    )
     task = TaskInfo(
         module=module_name,
         processor=processor_name,
@@ -89,7 +109,7 @@ async def run_task(
 @app.get("/tasks/{id}")
 async def get_task_request(
     id: str = Path(...),
-    db_name: str = Query(...),
+    workspace: str = Query(...),
 ) -> TaskInfo:
     if not id in tasks:
         raise HTTPException(status_code=404)
@@ -99,7 +119,7 @@ async def get_task_request(
 @app.get("/tasks/{id}/request")
 async def get_task_request(
     id: str = Path(...),
-    db_name: str = Query(...),
+    workspace: str = Query(...),
 ) -> TaskRequest:
     if not id in tasks:
         raise HTTPException(status_code=404)
