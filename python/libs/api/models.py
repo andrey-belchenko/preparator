@@ -47,14 +47,14 @@ class ProcessorInfo(BaseModel):
 
 
 class TaskRequest(BaseModel):
-    class Binding(BaseModel):
-        name: str
-        value: Union[str, List[Any], Any]
+    # class Binding(BaseModel):
+    #     name: str
+    #     value: Union[str, List[Any], Any]
 
     is_async: bool
     working_db_name: str
-    input_bindings: list[Binding]
-    output_bindings: list[Binding]
+    input_bindings: dict[str, Union[str, List[Any], Any]]
+    output_bindings: dict[str, Union[str, List[Any], Any]]
 
 
 class TaskInfo(BaseModel):
@@ -67,4 +67,4 @@ class TaskInfo(BaseModel):
     processor: str
     id: str
     status: TaskStatus
-    task_request: TaskRequest
+    # task_request: TaskRequest

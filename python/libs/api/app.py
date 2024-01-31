@@ -66,6 +66,7 @@ async def get_processor(
 
 
 tasks = {}
+task_requests = {}
 
 
 @app.post("/modules/{module_name}/processors/{processor_name}/tasks")
@@ -79,10 +80,10 @@ async def run_task(
         module=module_name,
         processor=processor_name,
         status=TaskInfo.TaskStatus.RUNNING,
-        task_request=task_request,
         id=str(uuid.uuid4()),
     )
     tasks[task.id] = task
+    task_requests[task.id] = task_request
     return task
 
 
@@ -91,4 +92,16 @@ async def get_task(
     id: str = Path(...),
     db_name: str = Query(...),
 ) -> TaskInfo:
+    if not id in tasks:
+        raise HTTPException(status_code=404)
     return tasks[id]
+
+
+@app.get("/tasks/{id}/request")
+async def get_task(
+    id: str = Path(...),
+    db_name: str = Query(...),
+) -> TaskRequest:
+    if not id in tasks:
+        raise HTTPException(status_code=404)
+    return task_requests[id]
