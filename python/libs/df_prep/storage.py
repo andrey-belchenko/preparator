@@ -19,15 +19,19 @@ class ConnectionInfo:
 
 
 class DatabaseInfo:
-    def __init__(self, name: str, connection: ConnectionInfo):
-        self.name = name
-        self.connection = connection
-        # if self.name == None:
-        #     from .system import system
-        #     self.name = system.db_name
-        # if self.connection == None:
-        #     self.connection = DbConnection()
-        self._instance = None
+    def __init__(
+        self,
+        name: str = None,
+        connection: ConnectionInfo = None,
+        instance: MongoDatabase = None,
+    ):
+        if instance != None:
+            self._instance = instance
+        else:
+            self.name = name
+            self.connection = connection
+            self._instance = None
+        
 
     def instance(self) -> MongoDatabase:
         if self._instance == None:

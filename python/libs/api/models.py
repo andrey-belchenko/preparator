@@ -52,7 +52,6 @@ class TaskRequest(BaseModel):
     #     value: Union[str, List[Any], Any]
 
     is_async: bool
-    working_db_name: str
     input_bindings: dict[str, Union[str, List[Any], Any]]
     output_bindings: dict[str, Union[str, List[Any], Any]]
 

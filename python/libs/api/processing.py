@@ -3,13 +3,16 @@ from os import path
 import os
 from typing import List, Union
 from pyparsing import Any
-from api.mongo import get_sys_db
+from api.mongo import get_db, get_sys_db
 from api import mongo
 from df_prep.deployment.deploy import run_main_function
 from df_prep.deployment.extract import download_project
-from df_prep.processor import Project
+from df_prep.processor import Project, Task
 
 _projects_by_workspace = dict[str, dict[str, Project]]()
+
+
+
 
 
 async def run_task(
@@ -23,8 +26,33 @@ async def run_task(
 ):
     await _refresh_project_source_if_need(workspace, project_name)
     project = await _get_project(workspace, project_name)
+    module = project.get_module(module_name)
+    task = module.create_task(processor_name)
+    task.bind_inputs(input_bindings)
+    task.bind_outputs(output_bindings)
+    task.set_database(get_db(workspace))
+    if is_async:
+        asyncio.create_task(
+            _process_task(task)
+        )
+    else:
+        await _process_task(task)
 
-
+async def _process_task(task: Task):
+    # task = tasks[task_id]
+    try:
+        task.run()
+        # result = f"Processed data: {data}"
+        # task.status = "SUCCEEDED"
+        # task.result = result
+    except Exception as e:
+        # task.status = "FAILED"
+        # task.error = str(e)
+        pass
+    finally:
+        pass
+        # tasks[task_id] = task  # Update task status
+    
 def _get_proj_path(workspace, project_name):
     return path.join(os.path.dirname(__file__), "dynamic", workspace, project_name)
 

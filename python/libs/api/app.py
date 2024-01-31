@@ -72,7 +72,7 @@ async def get_processor(
     return item
 
 
-tasks = {}
+task_infos = dict[str,TaskInfo]()
 task_requests = {}
 
 
@@ -98,15 +98,15 @@ async def run_task(
         task_request.output_bindings,
         task_request.is_async,
     )
-    task = TaskInfo(
+    task_info = TaskInfo(
         module=module_name,
         processor=processor_name,
         status=TaskInfo.TaskStatus.RUNNING,
         id=str(uuid.uuid4()),
     )
-    tasks[task.id] = task
-    task_requests[task.id] = task_request
-    return task
+    task_infos[task_info.id] = task_info
+    task_requests[task_info.id] = task_request
+    return task_info
 
 
 @app.get("/tasks/{id}")
@@ -114,9 +114,9 @@ async def get_task_request(
     id: str = Path(...),
     workspace: str = Query(...),
 ) -> TaskInfo:
-    if not id in tasks:
+    if not id in task_infos:
         raise HTTPException(status_code=404)
-    return tasks[id]
+    return task_infos[id]
 
 
 @app.get("/tasks/{id}/request")
@@ -124,6 +124,6 @@ async def get_task_request(
     id: str = Path(...),
     workspace: str = Query(...),
 ) -> TaskRequest:
-    if not id in tasks:
+    if not id in task_infos:
         raise HTTPException(status_code=404)
     return task_requests[id]

@@ -2,7 +2,7 @@ from __future__ import annotations
 import enum
 import os
 from types import ModuleType
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING, List, Union
 from .storage import (
     DatabaseInfo,
     ConnectionInfo,
@@ -12,6 +12,9 @@ from .storage import (
     MemoryWriter,
 )
 import inspect
+from pymongo.database import Database as MongoDatabase
+
+# todo replace print with logging
 
 
 class Project:
@@ -247,6 +250,19 @@ class Task:
     def bind_output(self, target: list[dict[str, Any]] | str):
         self.bind_named_output("default", target)
 
+    def bind_inputs(
+        self,
+        input_bindings: dict[str, Union[str, List[dict[str, Any]], dict[str, Any]]],
+    ):
+        for name in input_bindings:
+            self.bind_named_input(name, input_bindings[name])
+
+    def bind_outputs(
+        self, output_bindings: dict[str, Union[str, List[dict[str, Any]]]]
+    ):
+        for name in output_bindings:
+            self.bind_named_output(name, output_bindings[name])
+
     def _print_bindings(self, ports: dict, bindings: dict):
         for name in ports:
             val = None
@@ -307,6 +323,9 @@ class Task:
         if self._database != None:
             return self._database
         return self.processor.module.project._get_debug_db()
+
+    def set_database(self, value: MongoDatabase):
+        self._database = DatabaseInfo(instance=value)
 
     def get_named_reader(self, input_name: str) -> DbReader | MemoryReader:
         if not input_name in self.processor.inputs:
