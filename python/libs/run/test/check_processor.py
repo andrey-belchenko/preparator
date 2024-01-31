@@ -5,7 +5,7 @@ from run.processors.siber import clear_rs_data, match_substation, match_voltage_
 
 project = create_project()
 project.set_connection(
-    "mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017", "bav_test2"
+    "mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017", "bav_test3"
 )
 
 common_module = project.get_module("common")
@@ -74,7 +74,7 @@ def run_matching():
     # siber_module.create_task(match_voltage_level).run()
 
 
-# load_data_from_files()
-# run_matching()
+load_data_from_files()
+run_matching()
 
-print(siber_module.get_processor(match_substation).defined_in_file)
+# print(siber_module.get_processor(match_substation).defined_in_file)

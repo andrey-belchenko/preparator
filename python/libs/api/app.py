@@ -1,8 +1,7 @@
 import uuid
 from fastapi import FastAPI, HTTPException, Path, Query, Body
-from pymongo import MongoClient
 from pyparsing import Any
-
+from mongo import mongo
 from api.models import (
     ProjectInfo,
     ModuleInfo,
@@ -12,7 +11,7 @@ from api.models import (
 )
 
 app = FastAPI(port=8000)
-mongo = MongoClient(f"mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017")
+
 
 collection_prefix = "sys_python_"
 project_coll_name = f"{collection_prefix}project"
@@ -88,7 +87,7 @@ async def run_task(
 
 
 @app.get("/tasks/{id}")
-async def get_task(
+async def get_task_request(
     id: str = Path(...),
     db_name: str = Query(...),
 ) -> TaskInfo:
@@ -98,7 +97,7 @@ async def get_task(
 
 
 @app.get("/tasks/{id}/request")
-async def get_task(
+async def get_task_request(
     id: str = Path(...),
     db_name: str = Query(...),
 ) -> TaskRequest:

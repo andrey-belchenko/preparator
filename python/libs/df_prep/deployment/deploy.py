@@ -11,6 +11,7 @@ from df_prep.mongo.commands import upsert_one_with_timestamp
 from df_prep.mongo.files import delete_file, upload_file
 from df_prep.processor import Port
 from df_prep.deployment.common import _coll_prefix
+from df_prep.deployment import common
 
 
 def _dict_from_obj(obj):
@@ -23,10 +24,10 @@ def _dict_from_obj(obj):
     return dict
 
 
-def _remove_deployment(mongo_uri, mongo_database, project_name):
+def _remove_deployment(project_name):
     print(f"Remove deployment: start")
-    client = pymongo.MongoClient(mongo_uri)
-    db = client[mongo_database]
+    client = pymongo.MongoClient(common._mongo_uri)
+    db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
     filter = {"name": project_name}
     for doc in collection.find(filter):
@@ -40,11 +41,7 @@ def _remove_deployment(mongo_uri, mongo_database, project_name):
     print(f"Remove deployment: success")
 
 
-
-
 def _upload_project(
-    mongo_uri,
-    mongo_database,
     archive_path,
     project: Project,
     main_file_path,
@@ -53,8 +50,8 @@ def _upload_project(
 ):
     version_info = _get_version_info()
     print(f"Upload project: start")
-    client = pymongo.MongoClient(mongo_uri)
-    db = client[mongo_database]
+    client = pymongo.MongoClient(common._mongo_uri)
+    db = client[common._sys_db_name]
     collection = db[f"{_coll_prefix}project"]
     file_id = upload_file(archive_path, db)
     filter = {"name": project.name}

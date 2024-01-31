@@ -48,10 +48,10 @@ def configure(processor: Processor, get_data_frame_func):
         file_data = yandex_disk.download_file(api_token, path)
         df = get_data_frame_func(file_data)
         df = data_frame.clear_column_names(df)
-        if "selectFields" in params:
-            df = data_frame.select_columns(df, params["selectFields"])
-        if "addFields" in params:
-            df = data_frame.add_columns_with_const_values(df, params["addFields"])
+        if "select_fields" in params:
+            df = data_frame.select_columns(df, params["select_fields"])
+        if "add_fields" in params:
+            df = data_frame.add_columns_with_const_values(df, params["add_fields"])
         df = df.drop_duplicates()
         items = df.to_dict("records")
         writer = task.get_writer()
