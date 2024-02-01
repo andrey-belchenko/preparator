@@ -94,10 +94,11 @@ async def run_task(
         workspace=workspace,
         module=module_name,
         processor=processor_name,
-        status=TaskInfo.TaskStatus.STARTING,
+        status=TaskInfo.Status.STARTING,
         id=str(uuid.uuid4()),
     )
     mongo.save_task(task_info)
+    mongo.save_task_request(workspace, task_info.id, task_request)
     await processing.run_task(
         workspace,
         module_info["project"],
@@ -106,8 +107,9 @@ async def run_task(
         task_request.input_bindings,
         task_request.output_bindings,
         task_request.is_async,
+        task_info,
     )
-    task_info = mongo.get_task(task_info.id)
+    # task_info = mongo.get_task(task_info.id)
     return task_info
 
 
@@ -116,9 +118,10 @@ async def get_task_request(
     id: str = Path(...),
     workspace: str = Query(...),
 ) -> TaskInfo:
-    if not id in task_infos:
+    item = mongo.get_task(id)
+    if item == None:
         raise HTTPException(status_code=404)
-    return task_infos[id]
+    return item
 
 
 @app.get("/tasks/{id}/request")
@@ -126,6 +129,7 @@ async def get_task_request(
     id: str = Path(...),
     workspace: str = Query(...),
 ) -> TaskRequest:
-    if not id in task_infos:
+    item = mongo.get_task_request(id)
+    if item == None:
         raise HTTPException(status_code=404)
-    return task_requests[id]
+    return item

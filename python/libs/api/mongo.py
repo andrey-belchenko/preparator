@@ -1,8 +1,9 @@
 from dataclasses import asdict
 from pymongo import MongoClient
 from pymongo.collection import Collection
-from api.models import TaskInfo
+from api.models import TaskInfo, TaskRequest
 from fastapi.encoders import jsonable_encoder
+
 mongo_uri = f"mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017"
 sys_db_name = "bav_test_sys_python"
 mongo = MongoClient(mongo_uri)
@@ -46,7 +47,18 @@ def save_task(task: TaskInfo):
     )
 
 
-def _upsert_one_with_timestamp(collection: Collection, filter, set:dict):
+def get_task_request(task_id):
+    return get_sys_db()[task_coll_name].find_one({"task_id": task_id})
+
+
+def save_task_request(workspace: str, task_id: str, task_request: TaskRequest):
+    obj = jsonable_encoder(task_request)
+    obj["task_id"] = task_id
+    obj["workspace"] = workspace
+    _upsert_one_with_timestamp(get_sys_db()[task_coll_name], {"task_id": task_id}, obj)
+
+
+def _upsert_one_with_timestamp(collection: Collection, filter, set: dict):
     update = {"$currentDate": {"changed_at": True}, "$set": set}
     result = collection.update_one(filter, update, upsert=True)
     return result

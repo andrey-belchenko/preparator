@@ -1,0 +1,366 @@
+{
+	"info": {
+		"_postman_id": "750bcdb5-f30c-4e2b-ba73-39a91fc793f2",
+		"name": "Python API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7024385"
+	},
+	"item": [
+		{
+			"name": "projects",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/projects?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "projects/{name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/projects/siber?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"projects",
+						"siber"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/modules?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"modules"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/modules/common?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"modules",
+						"common"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "processors",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/processors?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"processors"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{module_name}/processors/{processor_name}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/modules/common/processors/input_ya_disk_excel?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"modules",
+						"common",
+						"processors",
+						"input_ya_disk_excel"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "modules/{module_name}/processors/{processor_name}/tasks",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"is_async\": true,\r\n    \"input_bindings\": {\r\n        \"params\": {\r\n            \"folder_path\": \"DataFabric/Прикладная разработка/Разное/Сибирь - Данные для сопоставления/data1\",\r\n            \"api_token\": \"y0_AgAEA7qjwkyUAADLWwAAAAD4F9e5CBIdi4wZTfa5hXBxUhCHwbcg6T8\",\r\n            \"file_path\": \"Substation_supa.xlsx\"\r\n        }\r\n    },\r\n    \"output_bindings\": {\r\n        \"default\": \"excel_data5\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/modules/common/processors/input_ya_disk_excel/tasks?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"modules",
+						"common",
+						"processors",
+						"input_ya_disk_excel",
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tasks/{id}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/tasks/d861897f-6d68-4cb4-9fcd-da2b484a35ae?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tasks",
+						"d861897f-6d68-4cb4-9fcd-da2b484a35ae"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tasks/{id}/request",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/tasks/d861897f-6d68-4cb4-9fcd-da2b484a35ae/request?workspace={{workspace}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tasks",
+						"d861897f-6d68-4cb4-9fcd-da2b484a35ae",
+						"request"
+					],
+					"query": [
+						{
+							"key": "workspace",
+							"value": "{{workspace}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workspace",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

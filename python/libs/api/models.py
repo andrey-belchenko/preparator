@@ -60,7 +60,7 @@ class TaskRequest(BaseModel):
 
 
 class TaskInfo(BaseModel):
-    class TaskStatus(enum.Enum):
+    class Status(enum.Enum):
         STARTING = "STARTING"
         RUNNING = "RUNNING"
         SUCCEEDED = "SUCCEEDED"
@@ -68,15 +68,16 @@ class TaskInfo(BaseModel):
 
     class PortInfo(BaseModel):
         name: str
-        binding: str
-        count: int
+        binding: Union[str, List[Any], Any]
+        count: Optional[int] = None
 
     workspace: str
     module: str
     processor: str
     id: str
-    status: TaskStatus
+    status: Status
     inputs: Optional[list[PortInfo]] = []
     outputs: Optional[list[PortInfo]] = []
+    message: Optional[str] =  None
 
     # task_request: TaskRequest

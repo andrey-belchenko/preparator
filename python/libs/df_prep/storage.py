@@ -31,7 +31,6 @@ class DatabaseInfo:
             self.name = name
             self.connection = connection
             self._instance = None
-        
 
     def instance(self) -> MongoDatabase:
         if self._instance == None:
@@ -43,9 +42,13 @@ class CollectionInfo:
     def __init__(self, collectionName: str, database: DatabaseInfo):
         self.name = collectionName
         self.database = database
+        self._count = 0
         # if self.database == None:
         #     self.database = Database()
         self._instance = None
+
+    def get_count(self):
+        return self._count
 
     def get_info(self):
         return f"collection '{self.name}'"
@@ -64,15 +67,20 @@ class DbReader(CollectionInfo):
         print(
             f"read {self.instance().count_documents({})} documents from {self.get_info()}"
         )
+        self._count = self.instance().count_documents()
         return self.instance().find({})
 
     def read_one(self):
+        self._count += 1
         return self.instance().find_one({})
 
 
 class MemoryReader:
     def __init__(self, data: list[dict[str, Any]]):
         self._data = data
+
+    def get_count(self):
+        return len(self._data)
 
     def get_info(self):
         return f"list[]"
@@ -90,7 +98,6 @@ class MemoryReader:
 class DbWriter(CollectionInfo):
     def __init__(self, collectionName: str, database: DatabaseInfo = None):
         super().__init__(collectionName, database)
-        self._count = 0
         self._closed = True
 
     def clear(self):
