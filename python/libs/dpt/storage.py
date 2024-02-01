@@ -64,10 +64,11 @@ class DbReader(CollectionInfo):
         super().__init__(collectionName, database)
 
     def read_all(self):
+        self._count = self.instance().count_documents({})
         print(
-            f"read {self.instance().count_documents({})} documents from {self.get_info()}"
+            f"read {self._count} documents from {self.get_info()}"
         )
-        self._count = self.instance().count_documents()
+       
         return self.instance().find({})
 
     def read_one(self):

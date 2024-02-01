@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="dpt",
-    version="0.2.0",
+    version="0.2.1",
     author="DF",
     author_email="your_email@example.com",
     packages=["dpt"],
