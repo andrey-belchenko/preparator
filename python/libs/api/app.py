@@ -72,7 +72,7 @@ async def get_processor(
     return item
 
 
-task_infos = dict[str,TaskInfo]()
+task_infos = dict[str, TaskInfo]()
 task_requests = {}
 
 
@@ -89,6 +89,15 @@ async def run_task(
             status_code=404,
             detail=f"module '{module_name}' is not found in workspace '{workspace}'",
         )
+
+    task_info = TaskInfo(
+        workspace=workspace,
+        module=module_name,
+        processor=processor_name,
+        status=TaskInfo.TaskStatus.STARTING,
+        id=str(uuid.uuid4()),
+    )
+    mongo.save_task(task_info)
     await processing.run_task(
         workspace,
         module_info["project"],
@@ -98,14 +107,7 @@ async def run_task(
         task_request.output_bindings,
         task_request.is_async,
     )
-    task_info = TaskInfo(
-        module=module_name,
-        processor=processor_name,
-        status=TaskInfo.TaskStatus.RUNNING,
-        id=str(uuid.uuid4()),
-    )
-    task_infos[task_info.id] = task_info
-    task_requests[task_info.id] = task_request
+    task_info = mongo.get_task(task_info.id)
     return task_info
 
 

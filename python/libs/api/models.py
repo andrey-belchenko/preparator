@@ -12,6 +12,7 @@ class ProjectInfo(BaseModel):
         is_dirty: bool
 
     name: str
+    workspace: str
     changed_at: datetime
     deployment_id: str
     main_file_path: str
@@ -23,6 +24,7 @@ class ProjectInfo(BaseModel):
 
 class ModuleInfo(BaseModel):
     name: str
+    workspace: str
     project: str
     defined_in_file: str
 
@@ -37,6 +39,7 @@ class ProcessorInfo(BaseModel):
         default_binding: Optional[str] = None
 
     name: str
+    workspace: str
     project: str
     module: str
     defined_in_file: str
@@ -58,10 +61,11 @@ class TaskRequest(BaseModel):
 
 class TaskInfo(BaseModel):
     class TaskStatus(enum.Enum):
+        STARTING = "STARTING"
         RUNNING = "RUNNING"
         SUCCEEDED = "SUCCEEDED"
         FAILED = "FAILED"
-
+    workspace: str
     module: str
     processor: str
     id: str
