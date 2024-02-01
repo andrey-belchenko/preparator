@@ -20,25 +20,27 @@ def create():
     )
 
     def action(task: Task):
-        df_rs = pd.DataFrame.from_dict(task.get_named_reader("rs").read_all())
-        df_supa = pd.DataFrame.from_dict(task.get_named_reader("supa").read_all())
-        df_old_matched = pd.DataFrame.from_dict(
-            task.get_named_reader("old_matched").read_all()
-        )
-        df_matched, df_rs_unmatched, df_supa_unmatched, df_duplicates = _match(
-            df_rs, df_supa, df_old_matched
-        )
+        def read(name):
+            return pd.DataFrame.from_dict(task.get_named_reader(name).read_all())
 
-        def save(data, output_name):
+        def save(output_name, data):
             writer = task.get_named_writer(output_name)
             writer.clear()
             writer.write_many(data.to_dict("records"))
             writer.close()
 
-        save(df_matched, "matched")
-        save(df_rs_unmatched, "rs_unmatched")
-        save(df_supa_unmatched, "supa_unmatched")
-        save(df_duplicates, "duplicates")
+        df_rs = read("rs")
+        df_supa = read("supa")
+        df_old_matched = read("old_matched")
+
+        df_matched, df_rs_unmatched, df_supa_unmatched, df_duplicates = _match(
+            df_rs, df_supa, df_old_matched
+        )
+
+        save("matched", df_matched)
+        save("rs_unmatched", df_rs_unmatched)
+        save("supa_unmatched", df_supa_unmatched)
+        save("duplicates", df_duplicates)
 
     processor.set_action(action)
     return processor
