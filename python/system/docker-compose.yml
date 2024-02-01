@@ -1,3 +1,5 @@
+version: '1.0'
+name: dpt-python
 services:
   dpt-python-api:
     restart: always
