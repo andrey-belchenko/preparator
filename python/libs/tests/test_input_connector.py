@@ -1,5 +1,5 @@
 import unittest
-from df_prep import Processor
+from dpt import Processor
 
 class TestInputConnector(unittest.TestCase):
     def test_greet(self):

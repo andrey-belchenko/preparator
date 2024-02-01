@@ -1,5 +1,5 @@
 import pandas as pd
-from df_prep import Module, Processor, Task, Task
+from dpt import Module, Processor, Task, Task
 from run.processors.utils import data_frame, yandex_disk
 
 

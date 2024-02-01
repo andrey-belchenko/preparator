@@ -1,11 +1,11 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
-    name="df_prep",
+    name="dpt",
     version="0.1.8",
     author="DF",
     author_email="your_email@example.com",
-    packages=["df_prep"],
+    packages=["dpt"],
     install_requires=[],
 )

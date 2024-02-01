@@ -5,14 +5,14 @@ from importlib.util import spec_from_file_location, module_from_spec
 import sys
 import uuid
 import git
-from df_prep import Project
+from dpt import Project
 import pymongo
 from pymongo.database import Database
-from df_prep.mongo.commands import upsert_one_with_timestamp
-from df_prep.mongo.files import delete_file, upload_file
-from df_prep.processor import Port
-from df_prep.deployment.common import _coll_prefix
-from df_prep.deployment import common
+from dpt.mongo.commands import upsert_one_with_timestamp
+from dpt.mongo.files import delete_file, upload_file
+from dpt.processor import Port
+from dpt.deployment.common import _coll_prefix
+from dpt.deployment import common
 _logger = logging.getLogger(__name__)
 
 def _dict_from_obj(obj):

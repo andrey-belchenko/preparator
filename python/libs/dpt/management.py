@@ -1,8 +1,8 @@
 import logging
 import pymongo
-from df_prep.deployment import extract
-from df_prep.deployment import common
-from df_prep.deployment.deploy import (
+from dpt.deployment import extract
+from dpt.deployment import common
+from dpt.deployment.deploy import (
     _copy_files_to_temp_dir,
     _make_archive,
     _remove_deployment,

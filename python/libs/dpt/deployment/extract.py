@@ -4,8 +4,8 @@ import os
 import shutil
 import zipfile
 from pymongo.database import Database
-from df_prep.deployment.common import _coll_prefix
-from df_prep.mongo.files import read_file_data
+from dpt.deployment.common import _coll_prefix
+from dpt.mongo.files import read_file_data
 
 _logger = logging.getLogger(__name__)
 

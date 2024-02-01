@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from df_prep import Module, Task, Processor
+from dpt import Module, Task, Processor
 
 
 def create():

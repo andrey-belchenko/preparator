@@ -7,9 +7,9 @@ from pyparsing import Any
 from api.models import TaskInfo
 from api.mongo import get_db, get_sys_db
 from api import mongo
-from df_prep.deployment.deploy import run_main_function
-from df_prep.deployment.extract import download_project
-from df_prep.processor import Project, Task
+from dpt.deployment.deploy import run_main_function
+from dpt.deployment.extract import download_project
+from dpt.processor import Project, Task
 
 _projects_by_workspace = dict[str, dict[str, Project]]()
 

@@ -1,5 +1,5 @@
 import pandas as pd
-from df_prep import Module, Processor
+from dpt import Module, Processor
 from .utils import input_ya_disk
 
 
