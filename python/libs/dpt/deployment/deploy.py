@@ -11,7 +11,7 @@ from pymongo.database import Database
 from dpt.mongo.commands import upsert_one_with_timestamp
 from dpt.mongo.files import delete_file, upload_file
 from dpt.processor import Port
-from dpt.deployment.common import _coll_prefix
+from dpt.deployment.common import coll_prefix
 from dpt.deployment import common
 _logger = logging.getLogger(__name__)
 
@@ -25,14 +25,14 @@ def _dict_from_obj(obj):
     return dict
 
 
-def _remove_deployment(project_name):
+def remove_deployment(project_name):
     _logger.info(f"Remove deployment: start")
-    client = pymongo.MongoClient(common._mongo_uri)
-    db = client[common._sys_db_name]
-    collection = db[f"{_coll_prefix}project"]
+    client = pymongo.MongoClient(common.mongo_uri)
+    db = client[common.sys_db_name]
+    collection = db[f"{coll_prefix}project"]
     filter = {
         "name": project_name,
-        "workspace": common._workspace_name,
+        "workspace": common.workspace_name,
     }
     for doc in collection.find(filter):
         old_file_id = doc["file_id"]
@@ -41,14 +41,14 @@ def _remove_deployment(project_name):
     collection.delete_many(filter)
     filter = {
         "project": project_name,
-        "workspace": common._workspace_name,
+        "workspace": common.workspace_name,
     }
-    db[f"{_coll_prefix}module"].delete_many(filter)
-    db[f"{_coll_prefix}processor"].delete_many(filter)
+    db[f"{coll_prefix}module"].delete_many(filter)
+    db[f"{coll_prefix}processor"].delete_many(filter)
     _logger.info(f"Remove deployment: success")
 
 
-def _upload_project(
+def upload_project(
     archive_path,
     project: Project,
     main_file_path,
@@ -57,13 +57,13 @@ def _upload_project(
 ):
     version_info = _get_version_info()
     _logger.info(f"Upload project: start")
-    client = pymongo.MongoClient(common._mongo_uri)
-    db = client[common._sys_db_name]
-    collection = db[f"{_coll_prefix}project"]
+    client = pymongo.MongoClient(common.mongo_uri)
+    db = client[common.sys_db_name]
+    collection = db[f"{coll_prefix}project"]
     file_id = upload_file(archive_path, db)
     filter = {
         "name": project.name,
-        "workspace": common._workspace_name,
+        "workspace": common.workspace_name,
     }
     for doc in collection.find(filter):
         old_file_id = doc["file_id"]
@@ -72,7 +72,7 @@ def _upload_project(
     fields = _dict_from_obj(project)
     fields.update(
         {
-            "workspace": common._workspace_name,
+            "workspace": common.workspace_name,
             "file_id": file_id,
             "published_by": os.getlogin(),
             "version_info": version_info,
@@ -102,13 +102,13 @@ def _normalize_def_in_file(info: dict, root_path):
 
 
 def _update_modules_info(db: Database, project: Project, temp_path: str):
-    collection = db[f"{_coll_prefix}module"]
+    collection = db[f"{coll_prefix}module"]
     info_list = []
     for module in project.modules.values():
         info = _dict_from_obj(module)
         info.update(
             {
-                "workspace": common._workspace_name,
+                "workspace": common.workspace_name,
                 "project": project.name,
             }
         )
@@ -118,21 +118,21 @@ def _update_modules_info(db: Database, project: Project, temp_path: str):
     collection.delete_many(
         {
             "project": project.name,
-            "workspace": common._workspace_name,
+            "workspace": common.workspace_name,
         }
     )
     collection.insert_many(info_list)
 
 
 def _update_processors_info(db: Database, project: Project, temp_path: str):
-    collection = db[f"{_coll_prefix}processor"]
+    collection = db[f"{coll_prefix}processor"]
     info_list = []
     for module in project.modules.values():
         for processor in module.processors.values():
             info = _dict_from_obj(processor)
             info.update(
                 {
-                    "workspace": common._workspace_name,
+                    "workspace": common.workspace_name,
                     "project": project.name,
                     "module": module.name,
                 }
@@ -156,7 +156,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
     collection.delete_many(
         {
             "project": project.name,
-            "workspace": common._workspace_name,
+            "workspace": common.workspace_name,
         }
     )
     collection.insert_many(info_list)
@@ -181,7 +181,7 @@ def _get_version_info():
     return version_info
 
 
-def _make_archive(temp_path, project_name):
+def make_archive(temp_path, project_name):
     _logger.info("Make archive: start")
     archive_path = os.path.join(
         os.path.dirname(temp_path), "df_prep_projects", f"{project_name}"
@@ -200,7 +200,7 @@ def _make_archive(temp_path, project_name):
     return archive_path_ext
 
 
-def _copy_files_to_temp_dir(root_path, include: list[str] = None):
+def copy_files_to_temp_dir(root_path, include: list[str] = None):
     _logger.info("Collect source files: start")
     temp_path = os.path.join(root_path, "build", "df_prep_temp")
 

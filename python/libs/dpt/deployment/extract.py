@@ -4,18 +4,18 @@ import os
 import shutil
 import zipfile
 from pymongo.database import Database
-from dpt.deployment.common import _coll_prefix
+from dpt.deployment.common import coll_prefix
 from dpt.mongo.files import read_file_data
 
 _logger = logging.getLogger(__name__)
 
 
 def download_project(
-    workspace_name: Database, db: Database, project_name: str, folder_path: str
+    workspace_name: str, db: Database, project_name: str, folder_path: str
 ):
     _logger.info(f"Download project: start")
     _logger.info(f"- project_name: {project_name}")
-    collection = db[f"{_coll_prefix}project"]
+    collection = db[f"{coll_prefix}project"]
     info = collection.find_one({"workspace": workspace_name, "name": project_name})
     if info == None:
         raise Exception(f"Project '{project_name}' is not found in database {db.name}")

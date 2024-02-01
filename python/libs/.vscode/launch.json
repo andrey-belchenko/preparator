@@ -15,7 +15,7 @@
             "cwd": "${fileDirname}"
         },
         {
-            "name": "Python: FastAPI",
+            "name": "Python: FastAPI (dev)",
             "type": "python",
             "request": "launch",
             "module": "uvicorn",
@@ -23,6 +23,7 @@
                 "api.app:app",
                 "--reload"
             ],
+            "envFile": "${workspaceFolder}/api/env/.env.dev" ,
             "justMyCode": false
         }
     ]

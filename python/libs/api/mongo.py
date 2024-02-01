@@ -1,11 +1,15 @@
 from dataclasses import asdict
+import os
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from api.models import TaskInfo, TaskRequest
 from fastapi.encoders import jsonable_encoder
+from dpt.deployment import common
 
-mongo_uri = f"mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017"
-sys_db_name = "bav_test_sys_python"
+# f"mongodb://root:eximer@mongodb.mrsk.oastu.lan:27017"
+mongo_uri = os.getenv("MONGO_URI")
+
+sys_db_name = common.sys_db_name
 mongo = MongoClient(mongo_uri)
 
 
