@@ -3,6 +3,6 @@
   "omnisharp.projectFilesExcludePattern": "**/node_modules/**,**/.git/**,**/bower_components/**",
   "files.exclude": {
     "**/__pycache__": true,
-    "**/__init__.py": true
+    "**/__init_.py": true
   }
 }
