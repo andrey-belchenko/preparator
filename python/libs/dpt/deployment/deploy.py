@@ -4,7 +4,7 @@ import shutil
 from importlib.util import spec_from_file_location, module_from_spec
 import sys
 import uuid
-import git
+
 from dpt import Project
 import pymongo
 from pymongo.database import Database
@@ -165,6 +165,7 @@ def _update_processors_info(db: Database, project: Project, temp_path: str):
 def _get_version_info():
     _logger.info("Get version info: start")
     try:
+        import git
         repo = git.Repo(search_parent_directories=True)
         version_info = {
             "repository": repo.remotes.origin.url,
@@ -172,7 +173,7 @@ def _get_version_info():
             "commit": repo.head.commit.hexsha,
             "is_dirty": bool(repo.is_dirty()),
         }
-    except git.exc.InvalidGitRepositoryError:
+    except:
         _logger.info("Get version info: git repository not found")  # todo не проверено
         return None
     if version_info != None:

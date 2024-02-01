@@ -1,0 +1,11 @@
+services:
+  dpt-python-api:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./api.dockerfile
+    env_file:
+      - ./api/env/.env.dev
+    ports:
+      - 18000:8000
+    image: dpt-python-api
