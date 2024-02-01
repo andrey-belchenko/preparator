@@ -55,8 +55,8 @@ class TaskRequest(BaseModel):
     #     value: Union[str, List[Any], Any]
 
     is_async: bool
-    input_bindings: dict[str, Union[str, List[Any], Any]]
-    output_bindings: dict[str, Union[str, List[Any], Any]]
+    input_bindings: Optional[dict[str, Union[str, List[Any], Any]]] = {}
+    output_bindings: Optional[dict[str, Union[str, List[Any], Any]]] = {}
 
 
 class TaskInfo(BaseModel):
@@ -65,9 +65,18 @@ class TaskInfo(BaseModel):
         RUNNING = "RUNNING"
         SUCCEEDED = "SUCCEEDED"
         FAILED = "FAILED"
+
+    class PortInfo(BaseModel):
+        name: str
+        binding: str
+        count: int
+
     workspace: str
     module: str
     processor: str
     id: str
     status: TaskStatus
+    inputs: Optional[list[PortInfo]] = []
+    outputs: Optional[list[PortInfo]] = []
+
     # task_request: TaskRequest

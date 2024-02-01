@@ -13,11 +13,20 @@ from pymongo.database import Database
 
 
 
+
+_logging_config_done = False
+
+
 def _configure_logging():
+    global _logging_config_done
+    if _logging_config_done:
+        return
+    _logging_config_done = True
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     console_handler = logging.StreamHandler()
     logger.addHandler(console_handler)
+
 
 def set_connection(mongo_uri: str):
     common._mongo_uri = mongo_uri

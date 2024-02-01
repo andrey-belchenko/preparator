@@ -39,7 +39,7 @@ def configure(processor: Processor, get_data_frame_func):
         },
     }
     processor.add_params_input(schema=schema)
-    processor.add_output()
+    processor.add_output(default_binding="some_data")
 
     def action(task: Task):
         params = task.get_params_reader().read_one()
